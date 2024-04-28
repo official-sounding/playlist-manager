@@ -1,4 +1,9 @@
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
+using Dapper;
 using FluentMigrator.Runner;
+using PlaylistManager.Data;
+using PlaylistManager.Data.Models;
 using PlaylistManager.Migrations.Scripts;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,7 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions((opts) => {
+    opts.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+});
 
 builder.Services.AddFluentMigratorCore()
                 .ConfigureRunner(rb => rb
@@ -19,6 +26,9 @@ builder.Services.AddFluentMigratorCore()
                     .ScanIn(typeof(CreateVideoTable).Assembly).For.Migrations())
                 // Enable logging to console in the FluentMigrator way
                 .AddLogging(lb => lb.AddFluentMigratorConsole());
+
+builder.Services.AddSingleton<IDbContext, SqliteDbContext>();
+builder.Services.AddTransient<IVideoRepository, VideoRepository>();
 
 var app = builder.Build();
 
@@ -34,6 +44,7 @@ app.MapControllers();
 
 
 UpdateDatabase(app.Services);
+
 app.Run();
 
 

@@ -35,7 +35,7 @@ internal static class MigrationExtensions
 
     public static ICreateTableColumnOptionOrWithColumnSyntax WithCreatedAt(this ICreateTableWithColumnSyntax tableWithColumnSyntax) {
         return tableWithColumnSyntax
-            .WithColumn("created_at").AsDateTime().NotNullable().WithDefault(SystemMethods.CurrentDateTime);
+            .WithColumn("createdAt").AsDateTime().NotNullable().WithDefault(SystemMethods.CurrentDateTime);
     }
 
     public static ICreateTableColumnOptionOrWithColumnSyntax WithTimeStamps(this ICreateTableWithColumnSyntax tableWithColumnSyntax)

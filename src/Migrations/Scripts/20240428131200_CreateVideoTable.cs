@@ -13,7 +13,7 @@ namespace PlaylistManager.Migrations.Scripts;
         {
             Create.Table("Video")
                 .WithIdColumn()
-                .WithColumn("video_url").AsString().NotNullable()
+                .WithColumn("videoUrl").AsString().NotNullable()
                 .WithColumn("filename").AsString().NotNullable()
                 .WithColumn("title").AsString().NotNullable()
                 .WithCreatedAt();
