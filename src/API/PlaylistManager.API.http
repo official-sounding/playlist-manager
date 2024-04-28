@@ -1,0 +1,6 @@
+@PlaylistManager.API_HostAddress = http://localhost:5125
+
+GET {{PlaylistManager.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
