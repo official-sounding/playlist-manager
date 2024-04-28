@@ -1,12 +1,11 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
-using Dapper;
 using FluentMigrator.Runner;
 using PlaylistManager.Data;
-using PlaylistManager.Data.Models;
 using PlaylistManager.Migrations.Scripts;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<YTConfig>(builder.Configuration.GetSection("ytdl"));
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -29,6 +28,8 @@ builder.Services.AddFluentMigratorCore()
 
 builder.Services.AddSingleton<IDbContext, SqliteDbContext>();
 builder.Services.AddTransient<IVideoRepository, VideoRepository>();
+builder.Services.AddTransient<YoutubeDLWrapper>();
+builder.Services.AddTransient<VideoService>();
 
 var app = builder.Build();
 

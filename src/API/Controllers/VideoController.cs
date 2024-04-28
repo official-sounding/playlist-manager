@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using PlaylistManager.Data.Models;
 
 [Route("/api/video")]
-public class VideoController(IVideoRepository repo): Controller {
+public class VideoController(IVideoRepository repo, VideoService service): Controller {
 
     [HttpGet("")]
     public async Task<IEnumerable<Video>> Index()
@@ -71,4 +71,11 @@ public class VideoController(IVideoRepository repo): Controller {
         }
     }
 
+    [HttpPost("download")]
+    public async Task<Video> DownloadFromUrl([FromBody] DownloadRequest req) {
+        return await service.DownloadVideoAsync(req.url);
+    }
+
 }
+
+public record DownloadRequest(string url);
