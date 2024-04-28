@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using YoutubeDLSharp;
+using YoutubeDLSharp.Metadata;
 using YoutubeDLSharp.Options;
 
 public class YoutubeDLWrapper {
@@ -15,14 +16,21 @@ public class YoutubeDLWrapper {
         };
     }
 
-    public async Task<YTDownloadResult> DownloadAsync(string url, CancellationToken ct = default) {
+    public async Task<YTDownloadResult> DownloadWithDataAsync(string url, CancellationToken ct = default) {
+
         var dl = await ytdl.RunVideoDownload(url, recodeFormat: VideoRecodeFormat.Mp4, ct: ct, overrideOptions: new OptionSet() { RestrictFilenames = true});
-        var data = await ytdl.RunVideoDataFetch(url, ct: ct);
+        var data = await GetVideoDataAsync(url);
 
         dl.EnsureSuccess();
-        data.EnsureSuccess();
 
-        return new YTDownloadResult(Path.GetFileName(dl.Data), url, data.Data.Title, data.Data.UploadDate, data.Data.Artist);
+        return new YTDownloadResult(Path.GetFileName(dl.Data), url, data.Title, data.UploadDate, data.Artist);
+    }
+
+    public async Task<VideoData> GetVideoDataAsync(string url, CancellationToken ct = default) {
+        var data = await ytdl.RunVideoDataFetch(url, ct: ct);
+        data.EnsureSuccess();
+        return data.Data;
+
     }
 }
 
