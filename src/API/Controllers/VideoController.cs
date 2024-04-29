@@ -72,10 +72,24 @@ public class VideoController(IVideoRepository repo, VideoService service): Contr
     }
 
     [HttpPost("download")]
-    public async Task<Video> DownloadFromUrl([FromBody] DownloadRequest req) {
-        return await service.DownloadVideoAsync(req.url);
+    public async Task<Video> DownloadFromUrl([FromBody] DownloadRequest req, CancellationToken ct) {
+        return await service.DownloadVideoAsync(req.url, ct);
+    }
+
+    [HttpPost("import")]
+    public async Task<List<ImportResult>> ImportFiles([FromBody] ImportRequest req, CancellationToken ct) {
+        var response = new List<ImportResult>();
+
+        foreach(var file in req.filenames) {
+            var res = await service.EnrichVideoAsync(file, ct);
+            response.Add(new(file, res));
+        }
+        
+        return response;
     }
 
 }
 
 public record DownloadRequest(string url);
+public record ImportRequest(IEnumerable<string> filenames);
+public record ImportResult(string filename, bool success);

@@ -16,4 +16,9 @@
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Data\PlaylistManager.Data.csproj" />
+    <ProjectReference Include="..\..\src\API\PlaylistManager.API.csproj" />
+  </ItemGroup>
+
 </Project>
