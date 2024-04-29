@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using PlaylistManager.Data.Models;
 
 [Route("/api/video")]
-public class VideoController(IVideoRepository repo, VideoService service): Controller {
+public class VideoController(IVideoRepository repo, IVideoJobQueue jobQueue): Controller {
 
     [HttpGet("")]
     public async Task<IEnumerable<Video>> Index()
@@ -72,24 +72,30 @@ public class VideoController(IVideoRepository repo, VideoService service): Contr
     }
 
     [HttpPost("download")]
-    public async Task<Video> DownloadFromUrl([FromBody] DownloadRequest req, CancellationToken ct) {
-        return await service.DownloadVideoAsync(req.url, ct);
+    public IActionResult DownloadFromUrl([FromBody] DownloadRequest req) {
+        var id = jobQueue.Enqueue(req);
+        var result = new QueueResult($"/api/video/job/{id}", id);
+        return Accepted(result.uri, result);
     }
 
     [HttpPost("import")]
-    public async Task<List<ImportResult>> ImportFiles([FromBody] ImportRequest req, CancellationToken ct) {
-        var response = new List<ImportResult>();
+    public IActionResult ImportFiles([FromBody] ImportRequest req) {
+        var id = jobQueue.Enqueue(req);
+        var result = new QueueResult($"/api/video/job/{id}", id);
+        return Accepted(result.uri, result);
+    }
 
-        foreach(var file in req.filenames) {
-            var res = await service.EnrichVideoAsync(file, ct);
-            response.Add(new(file, res));
+    [HttpGet("job/{jobId:guid}")]
+    public IActionResult GetJobStatus(Guid jobId) {
+        if(jobQueue.TryGetJob(jobId, out var job)) {
+            return Json(job);
         }
-        
-        return response;
+
+        return NotFound();
     }
 
 }
 
-public record DownloadRequest(string url);
-public record ImportRequest(IEnumerable<string> filenames);
-public record ImportResult(string filename, bool success);
+public record DownloadRequest(string url) : IVideoJobDetails;
+public record ImportRequest(IEnumerable<string> filenames) : IVideoJobDetails;
+public record QueueResult(string uri, Guid jobId);

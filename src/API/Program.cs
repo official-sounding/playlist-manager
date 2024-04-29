@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using FluentMigrator.Runner;
 using PlaylistManager.Data;
 using PlaylistManager.Migrations.Scripts;
@@ -13,7 +14,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers().AddJsonOptions((opts) => {
     opts.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
+
 
 builder.Services.AddFluentMigratorCore()
                 .ConfigureRunner(rb => rb
@@ -22,14 +25,28 @@ builder.Services.AddFluentMigratorCore()
                     // Set the connection string
                     .WithGlobalConnectionString(builder.Configuration.GetConnectionString("main"))
                     // Define the assembly containing the migrations
-                    .ScanIn(typeof(CreateVideoTable).Assembly).For.Migrations())
-                // Enable logging to console in the FluentMigrator way
-                .AddLogging(lb => lb.AddFluentMigratorConsole());
+                    .ScanIn(typeof(CreateVideoTable).Assembly).For.Migrations());
+
+builder.Services.AddLogging(lb => { 
+    lb.AddFluentMigratorConsole();
+    lb.AddSimpleConsole((sc) => { 
+        sc.SingleLine = true;
+        sc.UseUtcTimestamp = true;
+    });
+});
 
 builder.Services.AddSingleton<IDbContext, SqliteDbContext>();
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<IVideoJobQueue, VideoJobQueue>();
+
 builder.Services.AddTransient<IVideoRepository, VideoRepository>();
 builder.Services.AddTransient<YoutubeDLWrapper>();
 builder.Services.AddTransient<VideoService>();
+
+
+builder.Services.AddHostedService<VideoJobProcessingService>();
+
+
 
 var app = builder.Build();
 
