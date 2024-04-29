@@ -19,7 +19,7 @@ public class VideoService(YoutubeDLWrapper wrapper, IVideoRepository repo)
     {
         var dl = await wrapper.DownloadWithDataAsync(url, outputHandler, ct);
 
-        var createRequest = new VideoCreateRequest(dl.url, dl.filename, dl.title);
+        var createRequest = new VideoCreateRequest(dl.metadata.id, dl.filename, dl.metadata.title, dl.metadata.artist, dl.metadata.duration, dl.metadata.uploadedAt);
 
         return await repo.AddAsync(createRequest);
     }
@@ -34,7 +34,7 @@ public class VideoService(YoutubeDLWrapper wrapper, IVideoRepository repo)
 
         var data = await wrapper.GetVideoDataAsync(url, ct);
 
-        var createRequest = new VideoCreateRequest(url, Path.GetFileName(filename), data.Title);
+        var createRequest = new VideoCreateRequest(data.ID, Path.GetFileName(filename), data.Title, data.Artist, data.Duration, data.UploadDate);
 
         await repo.AddAsync(createRequest);
 

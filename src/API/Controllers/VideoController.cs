@@ -2,7 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using PlaylistManager.Data.Models;
 
 [Route("/api/video")]
-public class VideoController(IVideoRepository repo, IVideoJobQueue jobQueue): Controller {
+public class VideoController(IVideoRepository repo, IVideoJobQueue jobQueue) : Controller
+{
 
     [HttpGet("")]
     public async Task<IEnumerable<Video>> Index()
@@ -17,9 +18,12 @@ public class VideoController(IVideoRepository repo, IVideoJobQueue jobQueue): Co
     public async Task<IActionResult> GetById(int id)
     {
         var result = await repo.GetByIdAsync(id);
-        if(result == null) {
+        if (result == null)
+        {
             return NotFound();
-        } else {
+        }
+        else
+        {
             return Json(result);
         }
     }
@@ -27,9 +31,9 @@ public class VideoController(IVideoRepository repo, IVideoJobQueue jobQueue): Co
     [HttpPost("")]
     [ProducesResponseType(typeof(Video), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-    public async Task<IActionResult> Create(VideoCreateRequest request) 
+    public async Task<IActionResult> Create(VideoCreateRequest request)
     {
-        if(request?.videoUrl == null || request.filename ==null || request.title == null) 
+        if (request?.videoId == null || request.filename == null || request.title == null)
         {
             return UnprocessableEntity("Required Field is null");
         }
@@ -41,18 +45,27 @@ public class VideoController(IVideoRepository repo, IVideoJobQueue jobQueue): Co
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> Update(int id, Video body) 
+    public async Task<IActionResult> Update(int id, Video body)
     {
-        if(id <= 0)
+        if (id <= 0)
         {
             return BadRequest("id is invalid");
         }
-        if(body?.videoUrl == null || body.filename ==null || body.title == null) 
+        if (body?.videoId == null || body.filename == null || body.title == null)
         {
             return UnprocessableEntity("Required Field is null");
         }
 
-        var request = new Video{ id = id, videoUrl = body.videoUrl, filename = body.filename, title = body.title };
+        var request = new Video
+        {
+            id = id,
+            videoId = body.videoId,
+            filename = body.filename,
+            title = body.title,
+            artist = body.artist,
+            duration = body.duration,
+            uploadedAt = body.uploadedAt,
+        };
 
         await repo.UpdateAsync(request);
         return NoContent();
@@ -61,33 +74,41 @@ public class VideoController(IVideoRepository repo, IVideoJobQueue jobQueue): Co
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> Delete(int id) {
+    public async Task<IActionResult> Delete(int id)
+    {
         var result = await repo.DeleteByIdAsync(id);
 
-        if(result == null) {
+        if (result == null)
+        {
             return NotFound();
-        } else {
+        }
+        else
+        {
             return Json(result);
         }
     }
 
     [HttpPost("download")]
-    public IActionResult DownloadFromUrl([FromBody] DownloadRequest req) {
+    public IActionResult DownloadFromUrl([FromBody] DownloadRequest req)
+    {
         var id = jobQueue.Enqueue(req);
         var result = new QueueResult($"/api/video/job/{id}", id);
         return Accepted(result.uri, result);
     }
 
     [HttpPost("import")]
-    public IActionResult ImportFiles([FromBody] ImportRequest req) {
+    public IActionResult ImportFiles([FromBody] ImportRequest req)
+    {
         var id = jobQueue.Enqueue(req);
         var result = new QueueResult($"/api/video/job/{id}", id);
         return Accepted(result.uri, result);
     }
 
     [HttpGet("job/{jobId:guid}")]
-    public IActionResult GetJobStatus(Guid jobId) {
-        if(jobQueue.TryGetJob(jobId, out var job)) {
+    public IActionResult GetJobStatus(Guid jobId)
+    {
+        if (jobQueue.TryGetJob(jobId, out var job))
+        {
             return Json(job);
         }
 

@@ -2,7 +2,8 @@ using Dapper;
 using PlaylistManager.Data;
 using PlaylistManager.Data.Models;
 
-public interface IVideoRepository {
+public interface IVideoRepository
+{
     Task<IEnumerable<Video>> GetAllAsync();
     Task<Video?> GetByIdAsync(int id);
     Task<IEnumerable<Video>> SearchAsync(string term);
@@ -16,8 +17,8 @@ public class VideoRepository(IDbContext dbContext) : IVideoRepository
     {
         using var conn = dbContext.DbConnection;
         return await conn.QueryFirstAsync<Video>(@"
-            INSERT INTO video (videoUrl, filename, title) 
-            VALUES (@videoUrl,@filename,@title)
+            INSERT INTO video (videoId, filename, title, artist, duration, uploadedAt) 
+            VALUES (@videoId,@filename,@title, @artist, @duration, @uploadedAt)
             RETURNING *
         ", request);
     }
@@ -43,14 +44,17 @@ public class VideoRepository(IDbContext dbContext) : IVideoRepository
         return await conn.QueryFirstOrDefaultAsync<Video>("select * from video where id = @id", new { id });
     }
 
-    public async Task UpdateAsync(Video video) 
+    public async Task UpdateAsync(Video video)
     {
         using var conn = dbContext.DbConnection;
         await conn.ExecuteAsync(@"
             UPDATE video SET
-                videoUrl=@videoUrl
+                videoId=@videoId
                 filename=@filename
                 title=@title
+                artist=@artist
+                duration=@duration
+                uploadedAt=@uploadedAt
             WHERE id = @id
             ", video);
     }

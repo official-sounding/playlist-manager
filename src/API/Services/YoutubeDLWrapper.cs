@@ -27,7 +27,7 @@ public class YoutubeDLWrapper
 
         dl.EnsureSuccess();
 
-        return new YTDownloadResult(Path.GetFileName(dl.Data), url, data.Title, data.UploadDate, data.Artist);
+        return new YTDownloadResult(Path.GetFileName(dl.Data), new(data.ID, data.Title, data.Artist, data.Thumbnail, data.Duration, data.UploadDate));
     }
 
     public async Task<VideoData> GetVideoDataAsync(string url, CancellationToken ct = default)
@@ -46,4 +46,6 @@ public class YTConfig
     public required string outputPath { get; set; }
 }
 
-public record YTDownloadResult(string filename, string url, string title, DateTime? uploadedAt, string artist);
+public record YTDownloadResult(string filename, VideoMetadata metadata);
+
+public record VideoMetadata(string id, string title, string artist, string thumbnail, float? duration, DateTime? uploadedAt);
