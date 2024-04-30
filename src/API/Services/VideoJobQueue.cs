@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 public interface IVideoJobQueue
 {
     public Guid Enqueue(IVideoJobDetails job);
-    public bool TryDequeue([MaybeNullWhen(false)] out QueueEntry entry);
+    IEnumerable<QueueEntry> ConsumeBlocking(CancellationToken ct);
     public bool TryMarkComplete(Guid jobId, JobStatus status, [MaybeNullWhen(false)] out QueueEntry entry);
     public bool TryGetJob(Guid jobId, [MaybeNullWhen(false)] out QueueStatus entry);
 
@@ -14,7 +14,7 @@ public interface IVideoJobQueue
 
 public class VideoJobQueue(ILogger<VideoJobQueue> logger, TimeProvider time) : IVideoJobQueue
 {
-    private readonly ConcurrentQueue<QueueEntry> jobQueue = new ConcurrentQueue<QueueEntry>();
+    private readonly BlockingCollection<QueueEntry> jobQueue = new BlockingCollection<QueueEntry>();
     private readonly ConcurrentDictionary<Guid, QueueEntry> jobDict = new ConcurrentDictionary<Guid, QueueEntry>();
     private readonly ConcurrentDictionary<Guid, List<string>> jobDetails = new ConcurrentDictionary<Guid, List<string>>();
 
@@ -24,25 +24,21 @@ public class VideoJobQueue(ILogger<VideoJobQueue> logger, TimeProvider time) : I
         var queueEntry = new QueueEntry(jobId, job, JobStatus.Queued, time.GetUtcNow().UtcDateTime);
 
         jobDict.TryAdd(jobId, queueEntry);
-        jobQueue.Enqueue(queueEntry);
+        jobQueue.Add(queueEntry);
 
         logger.LogInformation("Job Created with id {jobId}", jobId);
 
         return jobId;
     }
 
-    public bool TryDequeue([MaybeNullWhen(false)] out QueueEntry entry)
+    public IEnumerable<QueueEntry> ConsumeBlocking(CancellationToken ct)
     {
-        if (jobQueue.TryDequeue(out var qe) && qe != null)
+        foreach(var qe in jobQueue.GetConsumingEnumerable(ct))
         {
-            entry = qe with { status = JobStatus.Running, startTime = time.GetUtcNow().UtcDateTime };
+            var entry = qe with { status = JobStatus.Running, startTime = time.GetUtcNow().UtcDateTime };
             jobDict.TryUpdate(entry.id, entry, qe);
-            return true;
+            yield return entry;
         }
-
-        logger.LogDebug("No jobs in queue");
-        entry = default;
-        return false;
     }
 
     public bool TryMarkComplete(Guid jobId, JobStatus status, [MaybeNullWhen(false)] out QueueEntry entry)

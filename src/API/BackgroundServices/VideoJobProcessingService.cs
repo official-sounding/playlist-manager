@@ -6,25 +6,23 @@ public class VideoJobProcessingService(ILogger<VideoJobProcessingService> logger
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("Queue Process Started");
-        while (!stoppingToken.IsCancellationRequested)
+        await Task.Yield();
+        foreach (var queueItem in queue.ConsumeBlocking(stoppingToken))
         {
-            if (queue.TryDequeue(out var queueItem))
-            {
-                logger.LogInformation("Starting Video Job {queueItem}", queueItem);
-                try
-                {
-                    await RunQueueItem(queueItem, stoppingToken);
-                    queue.TryMarkComplete(queueItem.id, JobStatus.Success, out var success);
-                    logger.LogInformation("Video Job {queueItem} completed successfully", success);
-                }
-                catch (Exception e)
-                {
 
-                    queue.TryMarkComplete(queueItem.id, JobStatus.Error, out var err);
-                    logger.LogError(e, "Video Job {err} failed to process", err);
-                }
+            logger.LogInformation("Starting Video Job {queueItem}", queueItem);
+            try
+            {
+                await RunQueueItem(queueItem, stoppingToken);
+                queue.TryMarkComplete(queueItem.id, JobStatus.Success, out var success);
+                logger.LogInformation("Video Job {queueItem} completed successfully", success);
             }
-            await Task.Delay(1000);
+            catch (Exception e)
+            {
+
+                queue.TryMarkComplete(queueItem.id, JobStatus.Error, out var err);
+                logger.LogError(e, "Video Job {err} failed to process", err);
+            }
         }
         logger.LogInformation("Queue Process Exiting");
     }
