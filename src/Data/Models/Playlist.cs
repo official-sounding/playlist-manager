@@ -17,3 +17,5 @@ public class PlaylistEntry {
 
 public record PlaylistCreateRequest(string title);
 public record PlaylistEntryCreateRequest(int playlistId, int videoId, int order);
+
+public record PlaylistEntryUpdateRequest(List<PlaylistEntryCreateRequest> toAdd, List<int> toRemove, List<PlaylistEntry> toUpdate);
