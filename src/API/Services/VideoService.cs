@@ -41,6 +41,22 @@ public class VideoService(YoutubeDLWrapper wrapper, IVideoRepository repo)
         return true;
     }
 
+    public async Task<FileStream?> FileStreamById(int id, CancellationToken ct = default) {
+        var entry = await repo.GetByIdAsync(id);
+
+        if (entry == null) return null;
+
+        var fullPath = Path.Combine(wrapper.OutputPath, entry.filename);
+
+
+        try {
+            var file = File.OpenRead(fullPath);
+            return file;
+        } catch {
+            return null;
+        }
+
+    }
     public string? ExtractIdFromFilename(string filename)
     {
         var match = filenameMapper.Match(filename);

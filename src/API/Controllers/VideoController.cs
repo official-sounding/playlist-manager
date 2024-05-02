@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using PlaylistManager.Data.Models;
 
 [Route("/api/video")]
-public class VideoController(IVideoRepository repo, IVideoJobQueue jobQueue) : Controller
+public class VideoController(IVideoRepository repo, VideoService svc, IVideoJobQueue jobQueue) : Controller
 {
 
     [HttpGet("")]
@@ -22,10 +22,19 @@ public class VideoController(IVideoRepository repo, IVideoJobQueue jobQueue) : C
         {
             return NotFound();
         }
-        else
-        {
-            return Json(result);
+
+        return Json(result);
+    }
+
+    [HttpGet("{id:int}/data")]
+    public async Task<IActionResult> GetDataById(int id) {
+        var stream = await svc.FileStreamById(id);
+        
+        if(stream == null) {
+            return NotFound();
         }
+
+        return File(stream, "video/mp4", enableRangeProcessing: true);
     }
 
     [HttpPost("")]
@@ -72,7 +81,7 @@ public class VideoController(IVideoRepository repo, IVideoJobQueue jobQueue) : C
     }
 
     [HttpDelete("{id:int}")]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status404NotFound) ]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> Delete(int id)
     {
@@ -82,10 +91,8 @@ public class VideoController(IVideoRepository repo, IVideoJobQueue jobQueue) : C
         {
             return NotFound();
         }
-        else
-        {
-            return Json(result);
-        }
+
+        return Json(result);
     }
 
     [HttpPost("download")]

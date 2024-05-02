@@ -8,6 +8,8 @@ public class YoutubeDLWrapper
     private readonly YTConfig config;
     private readonly YoutubeDL ytdl;
 
+    public string OutputPath => config.outputPath;
+
     public YoutubeDLWrapper(IOptions<YTConfig> options)
     {
         config = options.Value;
