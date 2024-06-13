@@ -1,0 +1,14 @@
+
+
+.thumbnail {
+    width: 30vw;
+    text-align: center;
+}
+
+.thumbnail img {
+    height: 200px;
+}
+
+.videoDetails {
+    padding-left: 10px;
+}

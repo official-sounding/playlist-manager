@@ -7,7 +7,7 @@ public interface IVideoJobQueue
     IEnumerable<QueueEntry> ConsumeBlocking(CancellationToken ct);
     public bool TryMarkComplete(Guid jobId, JobStatus status, [MaybeNullWhen(false)] out QueueEntry entry);
     public bool TryGetJob(Guid jobId, [MaybeNullWhen(false)] out QueueStatus entry);
-
+    public IEnumerable<QueueEntry> GetAll();
     public void UpdateJob(Guid jobId, string update);
     public void CleanupOldJobs();
 }
@@ -53,6 +53,10 @@ public class VideoJobQueue(ILogger<VideoJobQueue> logger, TimeProvider time) : I
         logger.LogWarning("Tried to complete job {jobId} but it was not found", jobId);
         entry = default;
         return false;
+    }
+
+    public IEnumerable<QueueEntry> GetAll() {
+        return jobDict.Select(j => j.Value);
     }
 
     public bool TryGetJob(Guid jobId, [MaybeNullWhen(false)] out QueueStatus entry)

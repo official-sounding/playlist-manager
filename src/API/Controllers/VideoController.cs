@@ -111,6 +111,11 @@ public class VideoController(IVideoRepository repo, VideoService svc, IVideoJobQ
         return Accepted(result.uri, result);
     }
 
+    [HttpGet("job")]
+    public IActionResult GetJobs() {
+        return Json(jobQueue.GetAll());
+    }
+
     [HttpGet("job/{jobId:guid}")]
     public IActionResult GetJobStatus(Guid jobId)
     {
