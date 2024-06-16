@@ -1,5 +1,7 @@
 using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Channels;
 
 public interface IVideoJobQueue
 {
@@ -10,11 +12,17 @@ public interface IVideoJobQueue
     public IEnumerable<QueueEntry> GetAll();
     public void UpdateJob(Guid jobId, string update);
     public void CleanupOldJobs();
+
+    Task WriteLogAsync(QueueLog log);
+    Task ConsumeLogAsync(CancellationToken ct, Func<QueueLog, Task> consumer);
 }
 
 public class VideoJobQueue(ILogger<VideoJobQueue> logger, TimeProvider time) : IVideoJobQueue
 {
     private readonly BlockingCollection<QueueEntry> jobQueue = new BlockingCollection<QueueEntry>();
+
+    private ImmutableHashSet<ChannelWriter<QueueLog>> writers = ImmutableHashSet<ChannelWriter<QueueLog>>.Empty;
+
     private readonly ConcurrentDictionary<Guid, QueueEntry> jobDict = new ConcurrentDictionary<Guid, QueueEntry>();
     private readonly ConcurrentDictionary<Guid, List<string>> jobDetails = new ConcurrentDictionary<Guid, List<string>>();
 
@@ -97,6 +105,25 @@ public class VideoJobQueue(ILogger<VideoJobQueue> logger, TimeProvider time) : I
         var details = jobDetails.GetOrAdd(jobId, new List<string>());
         details.Add(update);
     }
+
+    public async Task WriteLogAsync(QueueLog log)
+    {
+        foreach(var writer in writers) {
+            await writer.WriteAsync(log);
+        }
+    }
+
+    public async Task ConsumeLogAsync(CancellationToken ct, Func<QueueLog, Task> consumer)
+    {
+        var channel = Channel.CreateUnbounded<QueueLog>();
+        ImmutableInterlocked.Update(ref writers, (writers, item) => writers.Add(item), channel.Writer);
+
+        await foreach (var item in channel.Reader.ReadAllAsync(ct)) {
+            await consumer(item);
+        }
+
+       ImmutableInterlocked.Update(ref writers, (writers, item) => writers.Remove(item), channel.Writer);
+    }
 }
 
 public interface IVideoJobDetails { }
@@ -118,3 +145,4 @@ public record QueueEntry(Guid id, IVideoJobDetails details, JobStatus status, Da
 }
 
 public record QueueStatus(QueueEntry job, List<string> statusUpdates);
+public record QueueLog(Guid id, JobStatus status, DateTime date, string entry);

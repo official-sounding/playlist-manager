@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using FluentMigrator.Runner;
+using Microsoft.Net.Http.Headers;
 using PlaylistManager.Data;
 using PlaylistManager.Migrations.Scripts;
 
@@ -12,7 +13,8 @@ builder.Services.Configure<YTConfig>(builder.Configuration.GetSection("ytdl"));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddControllers().AddJsonOptions((opts) => {
+builder.Services.AddControllers().AddJsonOptions((opts) =>
+{
     opts.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
@@ -27,9 +29,11 @@ builder.Services.AddFluentMigratorCore()
                     // Define the assembly containing the migrations
                     .ScanIn(typeof(CreateVideoTable).Assembly).For.Migrations());
 
-builder.Services.AddLogging(lb => { 
+builder.Services.AddLogging(lb =>
+{
     lb.AddFluentMigratorConsole();
-    lb.AddSimpleConsole((sc) => { 
+    lb.AddSimpleConsole((sc) =>
+    {
         sc.SingleLine = true;
         sc.UseUtcTimestamp = true;
     });
@@ -57,8 +61,27 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+app.UseMiddleware<OperationCanceledMiddleware>();
+
 app.MapControllers();
+app.MapGet("/api/video/job/stream", async (
+    IVideoJobQueue queue,
+  IHttpContextAccessor accessor,
+  CancellationToken ct
+) =>
+{
+    var response = accessor.HttpContext!.Response;
+    var LINE_END = $"{Environment.NewLine}{Environment.NewLine}";
+    response.Headers[HeaderNames.ContentType] = "text/event-stream";
+
+    await queue.ConsumeLogAsync(ct, async (item) => {
+        await response.WriteAsync($"{JsonSerializer.Serialize(item)}{LINE_END}", ct);
+        await response.Body.FlushAsync(ct);
+    });
+
+    await response.WriteAsync($@"{{ ""type"":""end"" }} {LINE_END}", ct);
+    await response.Body.FlushAsync(ct);
+});
 
 
 UpdateDatabase(app.Services);

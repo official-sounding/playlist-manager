@@ -126,7 +126,6 @@ public class VideoController(IVideoRepository repo, VideoService svc, IVideoJobQ
 
         return NotFound();
     }
-
 }
 
 public record DownloadRequest(string url) : IVideoJobDetails;
