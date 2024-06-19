@@ -128,6 +128,6 @@ public class VideoController(IVideoRepository repo, VideoService svc, IVideoJobQ
     }
 }
 
-public record DownloadRequest(string url) : IVideoJobDetails;
-public record ImportRequest(IEnumerable<string> filenames) : IVideoJobDetails;
+public record DownloadRequest(string url): IVideoJobDetails { public string JobType => "Download Request"; }
+public record ImportRequest(IEnumerable<string> filenames) : IVideoJobDetails { public string JobType => "Import Request"; }
 public record QueueResult(string uri, Guid jobId);

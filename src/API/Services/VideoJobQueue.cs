@@ -126,7 +126,9 @@ public class VideoJobQueue(ILogger<VideoJobQueue> logger, TimeProvider time) : I
     }
 }
 
-public interface IVideoJobDetails { }
+public interface IVideoJobDetails { 
+    string JobType { get; }
+ }
 
 public enum JobStatus
 {
