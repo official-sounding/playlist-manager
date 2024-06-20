@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using FluentMigrator.Runner;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using PlaylistManager.Data;
 using PlaylistManager.Migrations.Scripts;
@@ -44,6 +45,7 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<IVideoJobQueue, VideoJobQueue>();
 
 builder.Services.AddTransient<IVideoRepository, VideoRepository>();
+builder.Services.AddTransient<PlaylistRepository>();
 builder.Services.AddTransient<YoutubeDLWrapper>();
 builder.Services.AddTransient<VideoService>();
 
@@ -65,8 +67,8 @@ app.UseMiddleware<OperationCanceledMiddleware>();
 
 app.MapControllers();
 app.MapGet("/api/video/job/stream", async (
-    IVideoJobQueue queue,
-  IHttpContextAccessor accessor,
+  [FromServices] IVideoJobQueue queue,
+  [FromServices] IHttpContextAccessor accessor,
   CancellationToken ct
 ) =>
 {

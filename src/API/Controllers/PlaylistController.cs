@@ -1,3 +1,4 @@
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using PlaylistManager.Data.Models;
 
@@ -30,7 +31,7 @@ public class PlaylistController(PlaylistRepository repo): Controller
     [HttpPost("")]
     [ProducesResponseType(typeof(Playlist), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-    public async Task<IActionResult> Create(PlaylistCreateRequest request)
+    public async Task<IActionResult> Create([FromBody] PlaylistCreateRequest request)
     {
         if (request?.title == null)
         {
@@ -44,7 +45,7 @@ public class PlaylistController(PlaylistRepository repo): Controller
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> Update(int id, PlaylistEntryUpdateRequest body)
+    public async Task<IActionResult> Update(int id, [FromBody] PlaylistEntryUpdateRequest body)
     {
         if (id <= 0)
         {
@@ -53,5 +54,26 @@ public class PlaylistController(PlaylistRepository repo): Controller
 
         var result = await repo.UpdateEntriesAsync(id, body);
         return Json(result);
+    }
+
+    [HttpGet("{id:int}/{filename}.m3u8")]
+    public async Task<IActionResult> GetPlaylistFile(int id, string filename) {
+        if (id <= 0)
+        {
+            return BadRequest("id is invalid");
+        }
+
+        var result = await repo.GetByIdAsync(id);
+        if (result == null)
+        {
+            return NotFound();
+        }
+        else
+        {
+            var m3uContent = result.ToM3U();
+            var m3uBytes = Encoding.UTF8.GetBytes(m3uContent);
+            return File(m3uBytes, "application/mpegurl", $"{filename}.m3u8");
+        }
+
     }
 }
