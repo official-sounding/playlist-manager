@@ -1,6 +1,6 @@
-import { FormEvent, Suspense, useState } from "react";
-import { videoDownload } from "../../api/video";
-import { JobStatus } from "../jobStatus";
+import { FormEvent, Suspense, useState } from 'react';
+import { videoDownload } from '../../api/video';
+import { JobStatus } from '../jobStatus';
 
 export function Download() {
     const [jobId, setJobId] = useState<string | undefined>(undefined);
@@ -9,10 +9,9 @@ export function Download() {
 
     const { read, reset } = videoDownload;
 
-
-    if(run && url) {
+    if (run && url) {
         const job = read(url);
-        if(job.jobId !== jobId) {
+        if (job.jobId !== jobId) {
             setJobId(job.jobId);
         }
         setRun(false);
@@ -24,14 +23,17 @@ export function Download() {
         setRun(true);
     }
 
-    return <>
-        <form onSubmit={submit}>
-            <input type="text" value={url} onChange={(e) => setUrl(e.target.value)} />
-            <button type="submit">Download</button>
-        </form>
-        {jobId && <Suspense>
-            <JobStatus jobId={jobId} />
-        </Suspense>
-        }
-    </>
+    return (
+        <>
+            <form onSubmit={submit}>
+                <input type='text' value={url} onChange={(e) => setUrl(e.target.value)} />
+                <button type='submit'>Download</button>
+            </form>
+            {jobId && (
+                <Suspense>
+                    <JobStatus jobId={jobId} />
+                </Suspense>
+            )}
+        </>
+    );
 }

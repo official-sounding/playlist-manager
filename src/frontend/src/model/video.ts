@@ -9,4 +9,4 @@ export type Video = {
     createdAt: string;
     videoUrl: string;
     thumbnailUrl: string;
-}
+};
