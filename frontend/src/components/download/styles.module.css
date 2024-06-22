@@ -1,0 +1,27 @@
+.wrapper {
+    display: flex;
+    justify-content: space-around;
+}
+
+.searchbox {
+    width: 40vw;
+    font-size: 1.4rem;
+    background-color: transparent;
+    color: inherit;
+    margin-bottom: 8px;
+    padding: 4px 8px;
+    border: 1px solid;
+}
+
+.download {
+    font-size: 1.4rem;
+    background-color: transparent;
+    color: inherit;
+    border: 1px solid;
+    border-left: 0;
+    padding: 4px 8px;
+}
+
+.download:hover {
+    cursor: pointer;
+}

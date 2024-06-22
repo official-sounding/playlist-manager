@@ -2,6 +2,8 @@ import { FormEvent, Suspense, useState } from 'react';
 import { videoDownload } from '../../api/video';
 import { JobStatus } from '../jobStatus';
 
+import classes from './styles.module.css';
+
 export function Download() {
     const [jobId, setJobId] = useState<string | undefined>(undefined);
     const [run, setRun] = useState<boolean>(false);
@@ -24,16 +26,16 @@ export function Download() {
     }
 
     return (
-        <>
+        <div className={classes.wrapper}>
             <form onSubmit={submit}>
-                <input type='text' value={url} onChange={(e) => setUrl(e.target.value)} />
-                <button type='submit'>Download</button>
+                <input className={classes.searchbox} type='text' value={url} onChange={(e) => setUrl(e.target.value)} />
+                <button className={classes.download} type='submit'>Download</button>
             </form>
             {jobId && (
                 <Suspense>
                     <JobStatus jobId={jobId} />
                 </Suspense>
             )}
-        </>
+        </div>
     );
 }

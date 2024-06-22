@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { videoGet } from '../../api/video';
 import { Download } from '../download';
 
-import classes from './videoList.module.css';
+import classes from './styles.module.css';
 import { useConfigValues } from '../../providers/config';
 
 export function VideoList() {
@@ -14,7 +14,7 @@ export function VideoList() {
             <Suspense>
                 <Download></Download>
             </Suspense>
-
+            <div>{videos.length} Videos</div>
             <table className={classes.videoList}>
                 <thead>
                     <tr>
@@ -29,11 +29,11 @@ export function VideoList() {
                                 { showThumbnails && <img src={v.thumbnailUrl} /> }
                             </td>
                             <td className={classes.videoDetails}>
-                                <a href={v.videoUrl} target='_blank'>
+                                <div><a href={v.videoUrl} target='_blank'>
                                     {v.title}
-                                </a>
-                                <br />
-                                {v.duration} seconds <br />
+                                </a></div>
+                                
+                                <div className={classes.secondary}> {v.duration} seconds</div>
                             </td>
                         </tr>
                     ))}

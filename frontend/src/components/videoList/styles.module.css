@@ -1,0 +1,22 @@
+.videoList th {
+    text-align: left;
+}
+.thumbnail {
+    width: 30vw;
+    text-align: center;
+}
+
+.thumbnail img {
+    height: 100px;
+}
+
+.videoDetails {
+    padding-left: 10px;
+    font-size: 0.9em;
+    padding-bottom: 12px;
+}
+
+.videoDetails .secondary {
+    font-size: 0.8em;
+    line-height: 0.8em;
+}
