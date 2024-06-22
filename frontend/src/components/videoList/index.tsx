@@ -3,8 +3,10 @@ import { videoGet } from '../../api/video';
 import { Download } from '../download';
 
 import classes from './videoList.module.css';
+import { useConfigValues } from '../../providers/config';
 
 export function VideoList() {
+    const { showThumbnails } = useConfigValues();
     const videos = videoGet.read();
 
     return (
@@ -24,7 +26,7 @@ export function VideoList() {
                     {videos.map((v) => (
                         <tr>
                             <td className={classes.thumbnail}>
-                                <img src={v.thumbnailUrl} />
+                                { showThumbnails && <img src={v.thumbnailUrl} /> }
                             </td>
                             <td className={classes.videoDetails}>
                                 <a href={v.videoUrl} target='_blank'>
