@@ -6,6 +6,7 @@ public interface IVideoRepository
 {
     Task<IEnumerable<Video>> GetAllAsync();
     Task<Video?> GetByIdAsync(int id);
+    Task<Video?> GetByYTIdAsync(string ytId);
     Task<IEnumerable<Video>> SearchAsync(string term);
     Task<Video> AddAsync(VideoCreateRequest request);
     Task UpdateAsync(Video video);
@@ -42,6 +43,12 @@ public class VideoRepository(IDbContext dbContext) : IVideoRepository
     {
         using var conn = dbContext.DbConnection;
         return await conn.QueryFirstOrDefaultAsync<Video>("select * from video where id = @id", new { id });
+    }
+
+    public async Task<Video?> GetByYTIdAsync(string videoId)
+    {
+        using var conn = dbContext.DbConnection;
+        return await conn.QueryFirstOrDefaultAsync<Video>("select * from video where videoid = @videoId", new { videoId });
     }
 
     public async Task UpdateAsync(Video video)

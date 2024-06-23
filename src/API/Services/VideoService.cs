@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
 using PlaylistManager.Data.Models;
 
-public class VideoService(YoutubeDLWrapper wrapper, IVideoRepository repo)
+public partial class VideoService(YoutubeDLWrapper wrapper, IVideoRepository repo)
 {
 
     // regex matches...
@@ -13,15 +13,30 @@ public class VideoService(YoutubeDLWrapper wrapper, IVideoRepository repo)
     //   \]\.mp4    # the literal character string '].mp4'
     //   $          # the end of the string
     // end result, extract the contents of the square brackets next to the extension of the filename
-    private readonly Regex filenameMapper = new Regex(@".+\[([^\]]+)\]\.mp4$");
+    [GeneratedRegex(@".+\[([^\]]+)\]\.mp4$")]
+    private static partial Regex filenameMapper();
+
+    [GeneratedRegex(@".*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*")]
+    private static partial Regex urlMapper();
+
+    public async Task<bool> ValidateDownload(string url, CancellationToken ct = default) 
+    {
+        var id = ExtractIdFromUrl(url);
+        var exists = id == null ? null : await repo.GetByYTIdAsync(id);
+        return exists is null;
+    }
 
     public async Task<Video> DownloadVideoAsync(string url, Action<string> outputHandler, CancellationToken ct = default)
     {
         var dl = await wrapper.DownloadWithDataAsync(url, outputHandler, ct);
+        var exists = await repo.GetByYTIdAsync(dl.metadata.id);
 
-        var createRequest = new VideoCreateRequest(dl.metadata.id, dl.filename, dl.metadata.title, dl.metadata.artist, dl.metadata.duration, dl.metadata.uploadedAt);
-
-        return await repo.AddAsync(createRequest);
+        if(exists is null) {
+            var createRequest = new VideoCreateRequest(dl.metadata.id, dl.filename, dl.metadata.title, dl.metadata.artist, dl.metadata.duration, dl.metadata.uploadedAt);
+            return await repo.AddAsync(createRequest);
+        } else {
+            return exists;
+        }
     }
 
     public async Task<bool> EnrichVideoAsync(string filename, CancellationToken ct = default)
@@ -29,6 +44,7 @@ public class VideoService(YoutubeDLWrapper wrapper, IVideoRepository repo)
         var videoId = ExtractIdFromFilename(filename);
 
         if (string.IsNullOrEmpty(videoId)) return false;
+        if ((await repo.GetByYTIdAsync(videoId)) is not null) return false;
 
         var url = BuildYouTubeUrl(videoId);
 
@@ -59,10 +75,20 @@ public class VideoService(YoutubeDLWrapper wrapper, IVideoRepository repo)
     }
     public string? ExtractIdFromFilename(string filename)
     {
-        var match = filenameMapper.Match(filename);
+        var match = filenameMapper().Match(filename);
 
         if (match.Success)
         {
+            return match.Groups[1].Value;
+        }
+
+        return null;
+    }
+
+    public string? ExtractIdFromUrl(string url) {
+        var match = urlMapper().Match(url);
+
+        if(match.Success) {
             return match.Groups[1].Value;
         }
 

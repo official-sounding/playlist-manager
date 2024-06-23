@@ -96,8 +96,14 @@ public class VideoController(IVideoRepository repo, VideoService svc, IVideoJobQ
     }
 
     [HttpPost("download")]
-    public IActionResult DownloadFromUrl([FromBody] DownloadRequest req)
+    public async Task<IActionResult> DownloadFromUrl([FromBody] DownloadRequest req)
     {
+        var valid = await svc.ValidateDownload(req.url);
+
+        if(!valid) {
+            return Conflict();
+        }
+
         var id = jobQueue.Enqueue(req);
         var result = new QueueResult($"/api/video/job/{id}", id);
         return Accepted(result.uri, result);
