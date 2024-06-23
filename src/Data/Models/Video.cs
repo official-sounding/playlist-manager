@@ -13,7 +13,7 @@ public class Video
     public DateTime createdAt { get; init; }
 
     public string VideoUrl => $"https://youtu.be/{videoId}";
-    public string ThumbnailUrl => $"https://img.youtube.com/vi/{videoId}/maxresdefault.jpg";
+    public string ThumbnailUrl => $"https://img.youtube.com/vi/{videoId}/default.jpg";
 }
 
 public record VideoCreateRequest(string videoId, string filename, string title, string artist, float? duration, DateTime? uploadedAt);
