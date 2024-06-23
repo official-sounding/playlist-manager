@@ -48,6 +48,7 @@ builder.Services.AddTransient<IVideoRepository, VideoRepository>();
 builder.Services.AddTransient<PlaylistRepository>();
 builder.Services.AddTransient<YoutubeDLWrapper>();
 builder.Services.AddTransient<VideoService>();
+builder.Services.AddTransient<PagingService>();
 
 
 builder.Services.AddHostedService<VideoJobProcessingService>();
