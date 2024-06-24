@@ -32,11 +32,14 @@ builder.Services.AddFluentMigratorCore()
 
 builder.Services.AddLogging(lb =>
 {
-    lb.AddFluentMigratorConsole();
+    lb.ClearProviders();
+    //lb.AddFluentMigratorConsole();
     lb.AddSimpleConsole((sc) =>
     {
         sc.SingleLine = true;
         sc.UseUtcTimestamp = true;
+        sc.TimestampFormat = "s";
+        sc.ColorBehavior = Microsoft.Extensions.Logging.Console.LoggerColorBehavior.Disabled;
     });
 });
 
