@@ -48,6 +48,7 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<IVideoJobQueue, VideoJobQueue>();
 
 builder.Services.AddTransient<IVideoRepository, VideoRepository>();
+builder.Services.AddTransient<ITagRepository, TagRepository>();
 builder.Services.AddTransient<PlaylistRepository>();
 builder.Services.AddTransient<YoutubeDLWrapper>();
 builder.Services.AddTransient<VideoService>();

@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Dapper;
 using PlaylistManager.Data;
 using PlaylistManager.Data.Models;
@@ -35,20 +36,17 @@ public class VideoRepository(IDbContext dbContext) : IVideoRepository
 
     public async Task<IEnumerable<Video>> GetAllAsync()
     {
-        using var conn = dbContext.DbConnection;
-        return await conn.QueryAsync<Video>("select * from video");
+        return await QueryVideos("", null);
     }
 
     public async Task<Video?> GetByIdAsync(int id)
     {
-        using var conn = dbContext.DbConnection;
-        return await conn.QueryFirstOrDefaultAsync<Video>("select * from video where id = @id", new { id });
+        return (await QueryVideos("where id = @id", new { id })).FirstOrDefault();
     }
 
     public async Task<Video?> GetByYTIdAsync(string videoId)
     {
-        using var conn = dbContext.DbConnection;
-        return await conn.QueryFirstOrDefaultAsync<Video>("select * from video where videoid = @videoId", new { videoId });
+        return (await QueryVideos("where videoId = @videoId", new { videoId })).FirstOrDefault();
     }
 
     public async Task UpdateAsync(Video video)
@@ -69,5 +67,25 @@ public class VideoRepository(IDbContext dbContext) : IVideoRepository
     public Task<IEnumerable<Video>> SearchAsync(string term)
     {
         throw new NotImplementedException();
+    }
+
+    private async Task<IEnumerable<Video>> QueryVideos(string whereClause, object? parameters) {
+        using var conn = dbContext.DbConnection;
+        var dtos = await conn.QueryAsync<Video, Tag, VideoTagDTO>(@$"select v.*, t.* 
+        from video v 
+        left join tag_video vt on vt.videoId = v.id
+        left join tag t on vt.tagId = t.id {whereClause}", (v,t) => new(v,t));
+
+        return VideoTagDTO.MapDTOs(dtos);
+    }
+}
+
+public record VideoTagDTO(Video video, Tag tag) {
+    public static IEnumerable<Video> MapDTOs(IEnumerable<VideoTagDTO> dtos) {
+        return dtos
+            .GroupBy(vt => vt.video)
+            .Select(grp => {
+                return grp.Key with { tags = grp.Select(vt => vt.tag).Where(t => t != null).ToImmutableArray() };
+        });
     }
 }
