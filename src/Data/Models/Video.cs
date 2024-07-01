@@ -1,17 +1,12 @@
+using System.Collections.Immutable;
+
 namespace PlaylistManager.Data.Models;
 
 
-public class Video
+//(System.Int64 id, System.String videoId, System.String filename, System.String title, System.String createdAt, System.String artist, System.Int64 duration, System.String uploadedAt)
+public record Video(long id, string videoId, string filename, string title, DateTime createdAt, string artist, long duration, DateTime? uploadedAt, ImmutableArray<Tag>? tags = null)
 {
-    public int id { get; init; }
-    public required string videoId { get; init; }
-    public required string filename { get; init; }
-    public required string title { get; init; }
-    public required string artist { get; init; }
-    public required float duration { get; init; }
-    public DateTime? uploadedAt { get; init; }
-    public DateTime createdAt { get; init; }
-
+    private Video(): this(default, default!, default!, default!, default!, default!, default, default) {}
     public string VideoUrl => $"https://youtu.be/{videoId}";
     public string ThumbnailUrl => $"https://img.youtube.com/vi/{videoId}/default.jpg";
 }

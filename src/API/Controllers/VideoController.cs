@@ -65,17 +65,7 @@ public class VideoController(IVideoRepository repo, VideoService svc, IVideoJobQ
             return UnprocessableEntity("Required Field is null");
         }
 
-        var request = new Video
-        {
-            id = id,
-            videoId = body.videoId,
-            filename = body.filename,
-            title = body.title,
-            artist = body.artist,
-            duration = body.duration,
-            uploadedAt = body.uploadedAt,
-        };
-
+        var request = body with { id = id };
         await repo.UpdateAsync(request);
         return NoContent();
     }
