@@ -45,7 +45,7 @@ public class PlaylistController(PlaylistRepository repo): Controller
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> Update(int id, [FromBody] PlaylistEntryUpdateRequest body)
+    public async Task<IActionResult> Update(int id, [FromBody] PlaylistEntriesUpdateRequest body)
     {
         if (id <= 0)
         {

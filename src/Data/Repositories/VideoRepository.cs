@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Linq;
 using Dapper;
 using PlaylistManager.Data;
 using PlaylistManager.Data.Models;
@@ -52,7 +53,12 @@ public class VideoRepository(IDbContext dbContext) : IVideoRepository
     public async Task UpdateAsync(Video video)
     {
         using var conn = dbContext.DbConnection;
-        await conn.ExecuteAsync(@"
+        conn.Open();
+        using var transaction = conn.BeginTransaction();
+
+        try
+        {
+            await conn.ExecuteAsync(@"
             UPDATE video SET
                 videoId=@videoId
                 filename=@filename
@@ -61,7 +67,21 @@ public class VideoRepository(IDbContext dbContext) : IVideoRepository
                 duration=@duration
                 uploadedAt=@uploadedAt
             WHERE id = @id
-            ", video);
+            ", video, transaction: transaction);
+
+            await conn.ExecuteAsync("DELETE FROM tag_video where videoId = @id", new { video.id }, transaction: transaction);
+            if (video.tags is not null)
+            {
+                await conn.ExecuteAsync("INSERT INTO tag_video (tagId,videoId) VALUES (@tagId, @videoId)", video.tags?.Select(t => new { tagId = t.id, videoId = video.id }));
+            }
+
+            transaction.Commit();
+        }
+        catch
+        {
+            transaction.Rollback();
+            throw;
+        }
     }
 
     public Task<IEnumerable<Video>> SearchAsync(string term)
@@ -69,23 +89,27 @@ public class VideoRepository(IDbContext dbContext) : IVideoRepository
         throw new NotImplementedException();
     }
 
-    private async Task<IEnumerable<Video>> QueryVideos(string whereClause, object? parameters) {
+    private async Task<IEnumerable<Video>> QueryVideos(string whereClause, object? parameters)
+    {
         using var conn = dbContext.DbConnection;
         var dtos = await conn.QueryAsync<Video, Tag, VideoTagDTO>(@$"select v.*, t.* 
         from video v 
         left join tag_video vt on vt.videoId = v.id
-        left join tag t on vt.tagId = t.id {whereClause}", (v,t) => new(v,t));
+        left join tag t on vt.tagId = t.id {whereClause}", (v, t) => new(v, t));
 
         return VideoTagDTO.MapDTOs(dtos);
     }
 }
 
-public record VideoTagDTO(Video video, Tag tag) {
-    public static IEnumerable<Video> MapDTOs(IEnumerable<VideoTagDTO> dtos) {
+public record VideoTagDTO(Video video, Tag tag)
+{
+    public static IEnumerable<Video> MapDTOs(IEnumerable<VideoTagDTO> dtos)
+    {
         return dtos
             .GroupBy(vt => vt.video)
-            .Select(grp => {
+            .Select(grp =>
+            {
                 return grp.Key with { tags = grp.Select(vt => vt.tag).Where(t => t != null).ToImmutableArray() };
-        });
+            });
     }
 }

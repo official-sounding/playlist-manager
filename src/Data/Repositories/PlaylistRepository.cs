@@ -21,26 +21,21 @@ public class PlaylistRepository(IDbContext dbContext) : IPlaylistRepository
     public async Task<Playlist?> GetByIdAsync(int id)
     {
         using var conn = dbContext.DbConnection;
-        return (await conn.QueryAsync<Playlist, PlaylistEntry, Video, Playlist>(@"
-        select *
+        return (await conn.QueryAsync<Playlist, Video, Tag, PlaylistEntryDTO>(@"
+        select p.*, v.*, t.*
         from playlist p
         left join playlist_entry pe on p.id = pe.playlistId
         left join video v on pe.videoId = v.id 
-        where p.id = @id", (playlist, playlistEntry, video) =>
-        {
-            if (playlistEntry != null)
-            {
-                playlistEntry.video = video;
-                playlist.entries.Add(playlistEntry);
-            }
-            return playlist;
-        }, new { id }, splitOn: "id, id"))
-            .GroupBy(p => p.id)
+        left join tag_video tv on v.id = tv.videoId
+        left join tag t on vt.tagId = t.id
+        where p.id = @id
+        order by pe.entryorder", (playlist, video, tag) => new(playlist, new(video, tag)), new { id }))
+            .GroupBy(p => p.playlist.id)
             .Select((grp) =>
             {
-                var p = grp.First();
-                p.entries = grp.Where(p => p.entries.Count != 0).Select(p => p.entries.Single()).ToList();
-                return p;
+                var (playlist, _) = grp.First();
+                playlist.entries = VideoTagDTO.MapDTOs(grp.Select(dto => dto.vt)).ToList();
+                return playlist;
             })
             .FirstOrDefault();
     }
@@ -57,7 +52,7 @@ public class PlaylistRepository(IDbContext dbContext) : IPlaylistRepository
         ", request);
     }
 
-    public async Task<Playlist?> UpdateEntriesAsync(int playlistId, PlaylistEntryUpdateRequest request)
+    public async Task<Playlist?> UpdateEntriesAsync(int playlistId, PlaylistEntriesUpdateRequest request)
     {
         using var conn = dbContext.DbConnection;
         conn.Open();
@@ -73,22 +68,22 @@ public class PlaylistRepository(IDbContext dbContext) : IPlaylistRepository
                 tasks.Add(conn.ExecuteAsync(@"
             INSERT INTO playlist_entry(playlistId, videoId, entryorder)
             VALUES (@playlistId, @videoId, @entryorder)
-        ", request.toAdd, transaction: transaction));
+        ", request.toAdd.Select(pe => new { playlistId, pe.videoId, pe.entryorder}), transaction: transaction));
             }
 
             if (request?.toRemove?.Count > 0)
             {
                 tasks.Add(conn.ExecuteAsync(@"
-            DELETE FROM playlist_entry WHERE id = @id
-        ", request.toRemove.Select(id => new { id }), transaction: transaction));
+            DELETE FROM playlist_entry WHERE playlistId = @id and videoId = @videoId
+        ", request.toRemove.Select(videoId => new { playlistId, videoId }), transaction: transaction));
             }
 
             if (request?.toUpdate?.Count > 0)
             {
                 tasks.Add(conn.ExecuteAsync(@"
-            UPDATE playlist_entry SET videoId = @videoId, entryorder = @entryorder
-            WHERE id = @id
-        ", request.toUpdate, transaction: transaction));
+            UPDATE playlist_entry SET entryorder = @entryorder
+            WHERE playlistId = @playlistId and videoId = @videoId 
+        ", request.toUpdate.Select(pe => new { playlistId, pe.videoId, pe.entryorder}), transaction: transaction));
             }
 
             await Task.WhenAll(tasks);
@@ -103,3 +98,5 @@ public class PlaylistRepository(IDbContext dbContext) : IPlaylistRepository
         return await GetByIdAsync(playlistId);
     }
 }
+
+public record PlaylistEntryDTO(Playlist playlist, VideoTagDTO vt);
