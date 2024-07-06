@@ -57,7 +57,7 @@ public partial class VideoService(YoutubeDLWrapper wrapper, IVideoRepository rep
         return true;
     }
 
-    public async Task<FileStream?> FileStreamById(int id, CancellationToken ct = default) {
+    public async Task<FileStream?> FileStreamById(long id, CancellationToken ct = default) {
         var entry = await repo.GetByIdAsync(id);
 
         if (entry == null) return null;

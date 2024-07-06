@@ -1,3 +1,4 @@
+using System.Data;
 using Dapper;
 using PlaylistManager.Data;
 using PlaylistManager.Data.Models;
@@ -24,14 +25,26 @@ public class TagRepository(IDbContext dbContext) : ITagRepository
         return await conn.QueryFirstOrDefaultAsync<Tag>("select * from tag where id = @id", new { id });
     }
 
+    private async Task<Tag?> ByTitleAsync(IDbConnection conn, string title) 
+    {
+        return await conn.QueryFirstOrDefaultAsync<Tag>("select * from tag where title = @title", new { title });
+    }
+
     public async Task<Tag> CreateAsync(TagCreateRequest request)
     {
         using var conn = dbContext.DbConnection;
+        var forDb = request with { title = request.title.ToLowerInvariant() };
+        var existing = await ByTitleAsync(conn, forDb.title);
+
+        if(existing != null) {
+            return existing;
+        }
+        
         return await conn.QueryFirstAsync<Tag>(@"
             INSERT INTO tag (title) 
             VALUES (@title)
             RETURNING *
-        ", request);
+        ", forDb);
     }
 
     public async Task<Tag?> DeleteAsync(long id)

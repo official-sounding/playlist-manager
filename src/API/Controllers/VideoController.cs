@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using PlaylistManager.Data.Models;
 
 [Route("/api/video")]
-public class VideoController(IVideoRepository repo, VideoService svc, IVideoJobQueue jobQueue) : Controller
+public class VideoController(IVideoRepository repo, ITagRepository tagRepo, VideoService svc, IVideoJobQueue jobQueue) : Controller
 {
 
     [HttpGet("")]
@@ -11,11 +11,11 @@ public class VideoController(IVideoRepository repo, VideoService svc, IVideoJobQ
         return await repo.GetAllAsync();
     }
 
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:long}")]
     [Produces(typeof(Video))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetById(int id)
+    public async Task<IActionResult> GetById(long id)
     {
         var result = await repo.GetByIdAsync(id);
         if (result == null)
@@ -26,8 +26,8 @@ public class VideoController(IVideoRepository repo, VideoService svc, IVideoJobQ
         return Json(result);
     }
 
-    [HttpGet("{id:int}/data")]
-    public async Task<IActionResult> GetDataById(int id) {
+    [HttpGet("{id:long}/data")]
+    public async Task<IActionResult> GetDataById(long id) {
         var stream = await svc.FileStreamById(id);
         
         if(stream == null) {
@@ -50,11 +50,11 @@ public class VideoController(IVideoRepository repo, VideoService svc, IVideoJobQ
         return Created($"/api/video/{result.id}", result);
     }
 
-    [HttpPut("{id:int}")]
+    [HttpPut("{id:long}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> Update(int id, Video body)
+    public async Task<IActionResult> Update(long id, Video body)
     {
         if (id <= 0)
         {
@@ -70,10 +70,10 @@ public class VideoController(IVideoRepository repo, VideoService svc, IVideoJobQ
         return NoContent();
     }
 
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{id:long}")]
     [ProducesResponseType(StatusCodes.Status404NotFound) ]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(long id)
     {
         var result = await repo.DeleteByIdAsync(id);
 
@@ -84,6 +84,33 @@ public class VideoController(IVideoRepository repo, VideoService svc, IVideoJobQ
 
         return Json(result);
     }
+
+    [HttpPost("{videoId:long}/tag/{tagId:long}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> AddTagToVideo(long videoId, long tagId)
+    {
+        await repo.AddTagAsync(videoId, tagId);
+        return NoContent();
+    }
+
+    [HttpPost("{videoId:long}/tag")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> AddNewTagToVideo(long videoId, [FromBody] TagCreateRequest req)
+    {
+        var tag = await tagRepo.CreateAsync(req);
+        await repo.AddTagAsync(videoId, tag.id);
+
+        return NoContent();
+    }
+
+    [HttpDelete("{videoId:long}/tag/{tagId:long}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> RemoveTagFromVideo(long videoId, long tagId)
+    {
+        await repo.RemoveTagAsync(videoId, tagId);
+        return NoContent();
+    }
+
 
     [HttpPost("download")]
     public async Task<IActionResult> DownloadFromUrl([FromBody] DownloadRequest req)

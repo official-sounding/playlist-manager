@@ -7,12 +7,15 @@ using PlaylistManager.Data.Models;
 public interface IVideoRepository
 {
     Task<IEnumerable<Video>> GetAllAsync();
-    Task<Video?> GetByIdAsync(int id);
+    Task<Video?> GetByIdAsync(long id);
     Task<Video?> GetByYTIdAsync(string ytId);
     Task<IEnumerable<Video>> SearchAsync(string term);
     Task<Video> AddAsync(VideoCreateRequest request);
     Task UpdateAsync(Video video);
-    Task<Video?> DeleteByIdAsync(int id);
+    Task<Video?> DeleteByIdAsync(long id);
+
+    Task AddTagAsync(long videoId, long tagId);
+    Task RemoveTagAsync(long videoId, long tagId);
 }
 public class VideoRepository(IDbContext dbContext) : IVideoRepository
 {
@@ -20,13 +23,13 @@ public class VideoRepository(IDbContext dbContext) : IVideoRepository
     {
         using var conn = dbContext.DbConnection;
         return await conn.QueryFirstAsync<Video>(@"
-            INSERT INTO video (videoId, filename, title, artist, duration, uploadedAt) 
+            INSERT longO video (videoId, filename, title, artist, duration, uploadedAt) 
             VALUES (@videoId,@filename,@title, @artist, @duration, @uploadedAt)
             RETURNING *
         ", request);
     }
 
-    public async Task<Video?> DeleteByIdAsync(int id)
+    public async Task<Video?> DeleteByIdAsync(long id)
     {
         using var conn = dbContext.DbConnection;
         return await conn.QueryFirstOrDefaultAsync<Video>(@"
@@ -40,7 +43,7 @@ public class VideoRepository(IDbContext dbContext) : IVideoRepository
         return await QueryVideos("", null);
     }
 
-    public async Task<Video?> GetByIdAsync(int id)
+    public async Task<Video?> GetByIdAsync(long id)
     {
         return (await QueryVideos("where id = @id", new { id })).FirstOrDefault();
     }
@@ -72,7 +75,7 @@ public class VideoRepository(IDbContext dbContext) : IVideoRepository
             await conn.ExecuteAsync("DELETE FROM tag_video where videoId = @id", new { video.id }, transaction: transaction);
             if (video.tags is not null)
             {
-                await conn.ExecuteAsync("INSERT INTO tag_video (tagId,videoId) VALUES (@tagId, @videoId)", video.tags?.Select(t => new { tagId = t.id, videoId = video.id }));
+                await conn.ExecuteAsync("INSERT longO tag_video (tagId,videoId) VALUES (@tagId, @videoId)", video.tags?.Select(t => new { tagId = t.id, videoId = video.id }));
             }
 
             transaction.Commit();
@@ -98,6 +101,18 @@ public class VideoRepository(IDbContext dbContext) : IVideoRepository
         left join tag t on vt.tagId = t.id {whereClause}", (v, t) => new(v, t));
 
         return VideoTagDTO.MapDTOs(dtos);
+    }
+
+    public async Task AddTagAsync(long videoId, long tagId)
+    {
+        using var conn = dbContext.DbConnection;
+        await conn.ExecuteAsync("insert or ignore longo tag_video (videoId, tagId) Values (@videoId, @tagId)", new { videoId, tagId });
+    }
+
+    public async Task RemoveTagAsync(long videoId, long tagId)
+    {
+        using var conn = dbContext.DbConnection;
+        await conn.ExecuteAsync("delete from tag_video where videoId = @videoId and tagId = @tagId", new { videoId, tagId });
     }
 }
 
