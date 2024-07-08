@@ -9,4 +9,10 @@ export type Video = {
     createdAt: string;
     videoUrl: string;
     thumbnailUrl: string;
+    tags: Tag[];
 };
+
+export type Tag = {
+    id: number;
+    title: string
+}

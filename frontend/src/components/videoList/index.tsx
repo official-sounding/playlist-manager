@@ -25,15 +25,15 @@ export function VideoList() {
                 <tbody>
                     {videos.map((v) => (
                         <tr>
-                            <td className={classes.thumbnail}>
-                                { showThumbnails && <img src={v.thumbnailUrl} /> }
+                            <td>
+                                { showThumbnails && <img src={v.thumbnailUrl} className={classes.thumbnail} /> }
                             </td>
                             <td className={classes.videoDetails}>
-                                <div><a href={v.videoUrl} target='_blank'>
-                                    {v.title}
-                                </a></div>
-                                
-                                <div className={classes.secondary}> {v.duration} seconds</div>
+                                <a href={v.videoUrl} target='_blank'>{v.title}</a>
+                            </td>
+                            <td className={classes.secondary}>{v.duration} seconds</td>
+                            <td className={classes.secondary}>
+
                             </td>
                         </tr>
                     ))}
