@@ -23,7 +23,7 @@ public class VideoRepository(IDbContext dbContext) : IVideoRepository
     {
         using var conn = dbContext.DbConnection;
         return await conn.QueryFirstAsync<Video>(@"
-            INSERT longO video (videoId, filename, title, artist, duration, uploadedAt) 
+            INSERT INTO video (videoId, filename, title, artist, duration, uploadedAt) 
             VALUES (@videoId,@filename,@title, @artist, @duration, @uploadedAt)
             RETURNING *
         ", request);
@@ -50,7 +50,7 @@ public class VideoRepository(IDbContext dbContext) : IVideoRepository
 
     public async Task<Video?> GetByYTIdAsync(string videoId)
     {
-        return (await QueryVideos("where videoId = @videoId", new { videoId })).FirstOrDefault();
+        return (await QueryVideos("where v.videoId = @videoId", new { videoId })).FirstOrDefault();
     }
 
     public async Task UpdateAsync(Video video)
@@ -75,7 +75,7 @@ public class VideoRepository(IDbContext dbContext) : IVideoRepository
             await conn.ExecuteAsync("DELETE FROM tag_video where videoId = @id", new { video.id }, transaction: transaction);
             if (video.tags is not null)
             {
-                await conn.ExecuteAsync("INSERT longO tag_video (tagId,videoId) VALUES (@tagId, @videoId)", video.tags?.Select(t => new { tagId = t.id, videoId = video.id }));
+                await conn.ExecuteAsync("INSERT INTO tag_video (tagId,videoId) VALUES (@tagId, @videoId)", video.tags?.Select(t => new { tagId = t.id, videoId = video.id }));
             }
 
             transaction.Commit();
@@ -98,7 +98,7 @@ public class VideoRepository(IDbContext dbContext) : IVideoRepository
         var dtos = await conn.QueryAsync<Video, Tag, VideoTagDTO>(@$"select v.*, t.* 
         from video v 
         left join tag_video vt on vt.videoId = v.id
-        left join tag t on vt.tagId = t.id {whereClause}", (v, t) => new(v, t));
+        left join tag t on vt.tagId = t.id {whereClause}", (v, t) => new(v, t), parameters);
 
         return VideoTagDTO.MapDTOs(dtos);
     }
@@ -106,7 +106,7 @@ public class VideoRepository(IDbContext dbContext) : IVideoRepository
     public async Task AddTagAsync(long videoId, long tagId)
     {
         using var conn = dbContext.DbConnection;
-        await conn.ExecuteAsync("insert or ignore longo tag_video (videoId, tagId) Values (@videoId, @tagId)", new { videoId, tagId });
+        await conn.ExecuteAsync("insert or ignore into tag_video (videoId, tagId) Values (@videoId, @tagId)", new { videoId, tagId });
     }
 
     public async Task RemoveTagAsync(long videoId, long tagId)
