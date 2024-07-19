@@ -3,6 +3,7 @@ import { videoGet } from '../../api/video';
 import { Download } from '../download';
 
 import classes from './styles.module.css';
+import { TagList } from './tagList';
 import { useAppSelector } from '../../store';
 
 export function VideoList() {
@@ -19,12 +20,14 @@ export function VideoList() {
                 <thead>
                     <tr>
                         <th>Thumbnail</th>
+                        <th>Title</th>
                         <th>Details</th>
+                        <th>Tags</th>
                     </tr>
                 </thead>
                 <tbody>
                     {videos.map((v) => (
-                        <tr>
+                        <tr key={v.id}>
                             <td>
                                 { showThumbnails && <img src={v.thumbnailUrl} className={classes.thumbnail} /> }
                             </td>
@@ -33,7 +36,7 @@ export function VideoList() {
                             </td>
                             <td className={classes.secondary}>{v.duration} seconds</td>
                             <td className={classes.secondary}>
-
+                                <TagList video={v} />
                             </td>
                         </tr>
                     ))}
