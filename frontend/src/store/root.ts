@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import config from './configSlice';
+import tag from './tagSlice';
 
 export const store = configureStore({
     reducer: {
         config,
+        tag
     },
 });
 

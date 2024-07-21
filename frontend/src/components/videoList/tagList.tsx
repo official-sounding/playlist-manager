@@ -1,9 +1,9 @@
-import { tagGet } from "../../api/tag/get";
 import { Video } from "../../model/video";
+import { useAppSelector } from "../../store";
 
 type Args = { video: Video };
 export function TagList({ video }: Args) {
-    const allTags = tagGet.read();
+    const allTags = useAppSelector(state => state.tag.allTags);
 
     return <>
     <ul>
