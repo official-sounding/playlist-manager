@@ -1,5 +1,4 @@
 import { QueueDetails } from '../../model/queue';
-import { wrapAsync } from '../wrapAsync';
 
 const getJob = async (url: string) => {
     const res = await fetch(url);
@@ -7,5 +6,5 @@ const getJob = async (url: string) => {
     return result;
 };
 
-export const jobFromUri = wrapAsync(getJob);
-export const jobFromId = wrapAsync(async (id: string) => await getJob(`/api/video/job/${id}`));
+export const jobFromUri = getJob;
+export const jobFromId = (id: string) => getJob(`/api/video/job/${id}`);

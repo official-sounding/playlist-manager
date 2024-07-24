@@ -1,10 +1,16 @@
-import { jobFromId } from '../../api/video';
 import { formatDistanceToNow } from 'date-fns';
-import { useResettableWrapper } from '../../api/wrapAsync';
+import { useAppDispatch, useAppSelector } from '../../store';
+import { getVideoStatus } from '../../store/slices/video';
+import { useCallback } from 'react';
 
 export function JobStatus({ jobId }: { jobId: string }) {
-    const { read, reset } = useResettableWrapper(jobFromId);
-    const { job } = read(jobId);
+    const dispatch = useAppDispatch();
+    const { job } = useAppSelector((state) => state.video.downloadRequests[jobId] ?? {});
+    const reload = useCallback(() => dispatch(getVideoStatus(jobId)), [dispatch, jobId]);
+
+    if(!job) {
+        return <></>
+    }
 
     const formattedQueue = formatDistanceToNow(job.queueTime);
     return (
@@ -17,7 +23,7 @@ export function JobStatus({ jobId }: { jobId: string }) {
                 <dt>Queue Date:</dt>
                 <dd title={job.queueTime}>{formattedQueue}</dd>
             </dl>
-            <button onClick={reset}>Reload</button>
+            <button onClick={reload}>Reload</button>
         </>
     );
 }

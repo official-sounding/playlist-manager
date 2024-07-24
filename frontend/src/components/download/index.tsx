@@ -1,11 +1,14 @@
-import { FormEvent, Suspense, useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { videoDownload } from '../../api/video';
 import { JobStatus } from '../jobStatus';
 
 import classes from './styles.module.css';
 import { errorMsg, isSafeError } from '../../api/apiError';
+import { useAppDispatch } from '../../store';
+import { getVideoStatus } from '../../store/slices/video';
 
 export function Download() {
+    const dispatch = useAppDispatch();
     const [jobId, setJobId] = useState<string | undefined>(undefined);
     const [run, setRun] = useState<boolean>(false);
     const [url, setUrl] = useState<string>('');
@@ -20,6 +23,7 @@ export function Download() {
         }
         if (!isSafeError(job) && job.jobId !== jobId) {
             setJobId(job.jobId);
+            dispatch(getVideoStatus(job.jobId));
         }
         setRun(false);
     }
@@ -38,11 +42,7 @@ export function Download() {
                 <button className={classes.download} type='submit'>Download</button>
             </form>
             { err && <div>{err}</div>}
-            {jobId && (
-                <Suspense>
-                    <JobStatus jobId={jobId} />
-                </Suspense>
-            )}
+            {jobId && (<JobStatus jobId={jobId} />)}
         </div>
     );
 }
