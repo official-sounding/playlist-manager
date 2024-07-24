@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { jobFromId, videoGet } from "../../api/video";
 import { Video } from "../../model/video";
 import { applyThunk, SliceWithRequest } from "../thunk-utils";
@@ -19,6 +19,11 @@ export const tagSlice = createSlice({
     name: 'video',
     initialState,
     reducers: {
+        removeVideoStatus: (state, action: PayloadAction<string>) => {
+            if(state.downloadRequests[action.payload]) {
+                delete state.downloadRequests[action.payload];
+            }
+        }
     },
     extraReducers: (builder) => {
         applyThunk(builder, getAllVideos, (state, payload) => state.allVideos = payload);
@@ -26,6 +31,7 @@ export const tagSlice = createSlice({
       },
 });
 
+export const { removeVideoStatus } = tagSlice.actions;
 export { getAllVideos, getVideoStatus };
 
 export default tagSlice.reducer;
