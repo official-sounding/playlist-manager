@@ -14,9 +14,11 @@ export type SliceKeysWithRequestState<Obj> = {
             never
 }[keyof Obj]
 
+export type SimpleAsyncThunk<R, C = void> = ReturnType<typeof createAsyncThunk<R, C>>
+
 export const initialRequestState: InitialState = { state: 'initial' };
 
-export function applyThunk<S extends SliceWithRequest, R>(builder: ActionReducerMapBuilder<S>, thunk: ReturnType<typeof createAsyncThunk<R, void>>, applicator: (s: Draft<S>, p: R) => void) {
+export function applyThunk<S extends SliceWithRequest, R>(builder: ActionReducerMapBuilder<S>, thunk: SimpleAsyncThunk<R>, applicator: (s: Draft<S>, p: R) => void) {
     builder
           .addCase(thunk.pending, (state, action) => {
             if (state.requestState[thunk.typePrefix]?.state !== 'pending') {

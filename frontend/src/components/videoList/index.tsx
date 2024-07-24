@@ -1,5 +1,4 @@
 import { Suspense } from 'react';
-import { videoGet } from '../../api/video';
 import { Download } from '../download';
 
 import classes from './styles.module.css';
@@ -8,7 +7,7 @@ import { useAppSelector } from '../../store';
 
 export function VideoList() {
     const { showThumbnails } = useAppSelector((state) => state.config);
-    const videos = videoGet.read();
+    const videos = useAppSelector((state) => state.video.allVideos);
 
     return (
         <>

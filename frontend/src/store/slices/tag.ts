@@ -1,6 +1,6 @@
-import { Tag } from '../model/tag';
-import { getTags } from '../api/tag/get';
-import { applyThunk, SliceWithRequest } from './thunk-utils';
+import { Tag } from '../../model/tag';
+import { getTags } from '../../api/tag/get';
+import { applyThunk, SliceWithRequest } from '../thunk-utils';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 

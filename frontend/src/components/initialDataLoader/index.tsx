@@ -1,14 +1,10 @@
-import { useAppDispatch, useThunkState } from "../../store";
-import { getAllTags } from "../../store/tagSlice"
+import { useDispatchThunkIfInitial } from "../../store";
+import { getAllTags } from "../../store/slices/tag"
+import { getAllVideos } from "../../store/slices/video";
 
 export function InitialDataLoader() {
-    const dispatch = useAppDispatch();
-
-    const tagStatus = useThunkState('tag', getAllTags.typePrefix);
-
-    if(tagStatus.state === 'initial') {
-        dispatch(getAllTags());
-    }
+    useDispatchThunkIfInitial('tag', getAllTags);
+    useDispatchThunkIfInitial('video', getAllVideos);
 
     return <></>
 }
