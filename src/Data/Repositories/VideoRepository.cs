@@ -22,11 +22,32 @@ public class VideoRepository(IDbContext dbContext) : IVideoRepository
     public async Task<Video> AddAsync(VideoCreateRequest request)
     {
         using var conn = dbContext.DbConnection;
-        return await conn.QueryFirstAsync<Video>(@"
+        conn.Open();
+        using var transaction = conn.BeginTransaction();
+
+        try
+        {
+
+            var video = await conn.QueryFirstAsync<Video>(@"
             INSERT INTO video (videoId, filename, title, artist, duration, uploadedAt) 
             VALUES (@videoId,@filename,@title, @artist, @duration, @uploadedAt)
             RETURNING *
         ", request);
+
+            if (request.tags is not null)
+            {
+                await conn.ExecuteAsync("INSERT INTO tag_video (tagId,videoId) VALUES (@tagId, @videoId)", request.tags?.Select(t => new { tagId = t.id, videoId = video.id }));
+            }
+
+
+            transaction.Commit();
+            return video with {  tags = request.tags?.ToImmutableArray() };
+        }
+        catch
+        {
+            transaction.Rollback();
+            throw;
+        }
     }
 
     public async Task<Video?> DeleteByIdAsync(long id)

@@ -1,7 +1,6 @@
 
-using System.Threading;
-using YoutubeDLSharp;
-public class VideoJobProcessingService(ILogger<VideoJobProcessingService> logger, IVideoJobQueue queue, VideoService videoService) : BackgroundService
+using PlaylistManager.Data.Models;
+public class VideoJobProcessingService(ILogger<VideoJobProcessingService> logger, IVideoJobQueue queue, VideoService videoService, ITagRepository tagRepository) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -40,9 +39,13 @@ public class VideoJobProcessingService(ILogger<VideoJobProcessingService> logger
 
     private async Task ImportFiles(QueueEntry item, ImportRequest req, CancellationToken ct)
     {
+
+        var tags = await Task.WhenAll(req.tags?.Select(t => tagRepository.CreateAsync(new(t))) ?? Enumerable.Empty<Task<Tag>>());
+
+
         foreach (var file in req.filenames)
         {
-            var success = await videoService.EnrichVideoAsync(file, ct);
+            var success = await videoService.EnrichVideoAsync(file, tags, ct);
             queue.UpdateJob(item.id, $"{file} enrich result: {success}");
         }
     }

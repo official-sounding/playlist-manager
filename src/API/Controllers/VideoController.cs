@@ -27,10 +27,12 @@ public class VideoController(IVideoRepository repo, ITagRepository tagRepo, Vide
     }
 
     [HttpGet("{id:long}/data")]
-    public async Task<IActionResult> GetDataById(long id) {
+    public async Task<IActionResult> GetDataById(long id)
+    {
         var stream = await svc.FileStreamById(id);
-        
-        if(stream == null) {
+
+        if (stream == null)
+        {
             return NotFound();
         }
 
@@ -71,7 +73,7 @@ public class VideoController(IVideoRepository repo, ITagRepository tagRepo, Vide
     }
 
     [HttpDelete("{id:long}")]
-    [ProducesResponseType(StatusCodes.Status404NotFound) ]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> Delete(long id)
     {
@@ -117,7 +119,8 @@ public class VideoController(IVideoRepository repo, ITagRepository tagRepo, Vide
     {
         var valid = await svc.ValidateDownload(req.url);
 
-        if(!valid) {
+        if (!valid)
+        {
             return Conflict();
         }
 
@@ -135,7 +138,8 @@ public class VideoController(IVideoRepository repo, ITagRepository tagRepo, Vide
     }
 
     [HttpGet("job")]
-    public IActionResult GetJobs() {
+    public IActionResult GetJobs()
+    {
         return Json(jobQueue.GetAll());
     }
 
@@ -151,6 +155,6 @@ public class VideoController(IVideoRepository repo, ITagRepository tagRepo, Vide
     }
 }
 
-public record DownloadRequest(string url): IVideoJobDetails { public string JobType => "Download Request"; }
-public record ImportRequest(IEnumerable<string> filenames) : IVideoJobDetails { public string JobType => "Import Request"; }
+public record DownloadRequest(string url) : IVideoJobDetails { public string JobType => "Download Request"; }
+public record ImportRequest(IEnumerable<string> filenames, IEnumerable<string>? tags = null) : IVideoJobDetails { public string JobType => "Import Request"; }
 public record QueueResult(string uri, Guid jobId);

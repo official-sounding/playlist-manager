@@ -39,7 +39,7 @@ public partial class VideoService(YoutubeDLWrapper wrapper, IVideoRepository rep
         }
     }
 
-    public async Task<bool> EnrichVideoAsync(string filename, CancellationToken ct = default)
+    public async Task<bool> EnrichVideoAsync(string filename, IEnumerable<Tag> tags, CancellationToken ct = default)
     {
         var videoId = ExtractIdFromFilename(filename);
 
@@ -50,7 +50,7 @@ public partial class VideoService(YoutubeDLWrapper wrapper, IVideoRepository rep
 
         var data = await wrapper.GetVideoDataAsync(url, ct);
 
-        var createRequest = new VideoCreateRequest(data.ID, Path.GetFileName(filename), data.Title, data.Artist, data.Duration, data.UploadDate);
+        var createRequest = new VideoCreateRequest(data.ID, Path.GetFileName(filename), data.Title, data.Artist, data.Duration, data.UploadDate, tags);
 
         await repo.AddAsync(createRequest);
 

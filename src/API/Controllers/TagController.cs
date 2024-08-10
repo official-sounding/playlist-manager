@@ -28,7 +28,7 @@ public class TagController(ITagRepository repo) : Controller
     [HttpPost("")]
     [ProducesResponseType(typeof(Tag), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-    public async Task<IActionResult> Create(TagCreateRequest request)
+    public async Task<IActionResult> Create([FromBody] TagCreateRequest request)
     {
         if (request.title == null)
         {
@@ -42,7 +42,7 @@ public class TagController(ITagRepository repo) : Controller
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> Update(long id, Tag body)
+    public async Task<IActionResult> Update(long id, [FromBody] Tag body)
     {
         if (id <= 0)
         {

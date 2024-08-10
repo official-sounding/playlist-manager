@@ -11,4 +11,4 @@ public record Video(long id, string videoId, string filename, string title, Date
     public string ThumbnailUrl => $"https://img.youtube.com/vi/{videoId}/default.jpg";
 }
 
-public record VideoCreateRequest(string videoId, string filename, string title, string artist, float? duration, DateTime? uploadedAt);
+public record VideoCreateRequest(string videoId, string filename, string title, string artist, float? duration, DateTime? uploadedAt, IEnumerable<Tag>? tags = null);
