@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { jobFromId, videoGet } from "../../api/video";
+import { jobFromId, videoDownload, videoGet } from "../../api/video";
 import { Video } from "../../model/video";
 import { applyThunk, SliceWithRequest } from "../thunk-utils";
 import { QueueDetails } from "../../model/queue";
@@ -14,6 +14,7 @@ const initialState: VideoSlice = { allVideos: [], requestState: { }, downloadReq
 
 const getAllVideos = createAsyncThunk('video/allVideos', () => videoGet())
 const getVideoStatus = createAsyncThunk('video/getVideoStatus', (id: string) => jobFromId(id))
+const downloadVideo = createAsyncThunk('video/download', (url: string) => videoDownload(url));
 
 export const tagSlice = createSlice({
     name: 'video',
@@ -32,6 +33,6 @@ export const tagSlice = createSlice({
 });
 
 export const { removeVideoStatus } = tagSlice.actions;
-export { getAllVideos, getVideoStatus };
+export { getAllVideos, getVideoStatus, downloadVideo };
 
 export default tagSlice.reducer;

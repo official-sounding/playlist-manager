@@ -1,4 +1,3 @@
-import { Suspense } from 'react';
 import { Download } from '../download';
 
 import classes from './styles.module.css';
@@ -11,9 +10,7 @@ export function VideoList() {
 
     return (
         <>
-            <Suspense>
-                <Download></Download>
-            </Suspense>
+            <Download />
             <div>{videos.length} Videos</div>
             <table className={classes.videoList}>
                 <thead>
