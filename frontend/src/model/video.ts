@@ -1,3 +1,5 @@
+import { Tag } from "./tag";
+
 export type Video = {
     id: number;
     videoId: string;
@@ -11,8 +13,3 @@ export type Video = {
     thumbnailUrl: string;
     tags: Tag[];
 };
-
-export type Tag = {
-    id: number;
-    title: string
-}

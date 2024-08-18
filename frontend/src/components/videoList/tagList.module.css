@@ -1,0 +1,25 @@
+.removeBtn {
+    background-color: transparent;
+    color: crimson;
+    display: inline;
+    border: 0;
+    cursor: pointer;
+}
+
+.tagList {
+    list-style: none;
+    padding: 0;
+}
+
+.tagSelect {
+    background-color: transparent;
+    color: inherit;
+    border: 1px solid;
+}
+
+.submitBtn {
+    background-color: transparent;
+    color: inherit;
+    border: 1px solid;
+    border-left: 0;
+}
