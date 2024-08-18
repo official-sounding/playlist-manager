@@ -155,6 +155,6 @@ public class VideoController(IVideoRepository repo, ITagRepository tagRepo, Vide
     }
 }
 
-public record DownloadRequest(string url) : IVideoJobDetails { public string JobType => "Download Request"; }
+public record DownloadRequest(string url, IEnumerable<string>? tags = null) : IVideoJobDetails { public string JobType => "Download Request"; }
 public record ImportRequest(IEnumerable<string> filenames, IEnumerable<string>? tags = null) : IVideoJobDetails { public string JobType => "Import Request"; }
 public record QueueResult(string uri, Guid jobId);

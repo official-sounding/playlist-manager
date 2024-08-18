@@ -26,13 +26,13 @@ public partial class VideoService(YoutubeDLWrapper wrapper, IVideoRepository rep
         return exists is null;
     }
 
-    public async Task<Video> DownloadVideoAsync(string url, Action<string> outputHandler, CancellationToken ct = default)
+    public async Task<Video> DownloadVideoAsync(string url, IEnumerable<Tag> tags, Action<string> outputHandler, CancellationToken ct = default)
     {
         var dl = await wrapper.DownloadWithDataAsync(url, outputHandler, ct);
         var exists = await repo.GetByYTIdAsync(dl.metadata.id);
 
         if(exists is null) {
-            var createRequest = new VideoCreateRequest(dl.metadata.id, dl.filename, dl.metadata.title, dl.metadata.artist, dl.metadata.duration, dl.metadata.uploadedAt);
+            var createRequest = new VideoCreateRequest(dl.metadata.id, dl.filename, dl.metadata.title, dl.metadata.artist, dl.metadata.duration, dl.metadata.uploadedAt, tags);
             return await repo.AddAsync(createRequest);
         } else {
             return exists;

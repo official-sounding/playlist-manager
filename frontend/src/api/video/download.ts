@@ -1,8 +1,8 @@
 import { QueueResult } from '../../model/queue';
 import { SafeError } from '../apiError';
 
-export const videoDownload = async (url: string): Promise<QueueResult | SafeError> => {
-    const req = { url };
+export const videoDownload = async (url: string, tags: string[]): Promise<QueueResult | SafeError> => {
+    const req = { url, tags };
     const res = await fetch('/api/video/download', {
         method: 'POST',
         body: JSON.stringify(req),

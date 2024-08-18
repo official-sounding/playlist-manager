@@ -39,8 +39,12 @@ public class VideoJobProcessingService(ILogger<VideoJobProcessingService> logger
 
     private async Task ImportFiles(QueueEntry item, ImportRequest req, CancellationToken ct)
     {
+        var tagTasks = req.tags?
+            .Where(t => !string.IsNullOrWhiteSpace(t))
+            .Select(t => tagRepository.CreateAsync(new(t.Trim()))) 
+        ?? Enumerable.Empty<Task<Tag>>();
 
-        var tags = await Task.WhenAll(req.tags?.Select(t => tagRepository.CreateAsync(new(t))) ?? Enumerable.Empty<Task<Tag>>());
+        var tags = await Task.WhenAll(tagTasks);
 
 
         foreach (var file in req.filenames)
@@ -52,7 +56,9 @@ public class VideoJobProcessingService(ILogger<VideoJobProcessingService> logger
 
     private async Task DownloadVideo(QueueEntry item, DownloadRequest req, CancellationToken ct)
     {
+        var tags = await Task.WhenAll(req.tags?.Select(t => tagRepository.CreateAsync(new(t))) ?? Enumerable.Empty<Task<Tag>>());
+
         var outputHandler = (string output) => queue.UpdateJob(item.id, output);
-        await videoService.DownloadVideoAsync(req.url, outputHandler, ct);
+        await videoService.DownloadVideoAsync(req.url, tags, outputHandler, ct);
     }
 }

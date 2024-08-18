@@ -14,7 +14,7 @@ const initialState: VideoSlice = { allVideos: [], requestState: { }, downloadReq
 
 const getAllVideos = createAsyncThunk('video/allVideos', () => videoGet())
 const getVideoStatus = createAsyncThunk('video/getVideoStatus', (id: string) => jobFromId(id))
-const downloadVideo = createAsyncThunk('video/download', (url: string) => videoDownload(url));
+const downloadVideo = createAsyncThunk('video/download', ({ url, tags}: { url: string, tags: string[] }) => videoDownload(url, tags));
 
 export const tagSlice = createSlice({
     name: 'video',
