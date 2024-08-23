@@ -1,6 +1,30 @@
+.videoList {
+    width: 100%;
+}
+
 .videoList th {
     text-align: left;
+    position: sticky;
+    top: 0; /* Don't forget this, required for the stickiness */
+    background-color: inherit;
+    padding-top: 8px;
 }
+
+@media (prefers-color-scheme: dark) {
+    .videoList th {
+        color: #c9d1d9;
+        background: #0d1117;
+    }
+}
+
+.videoList th.details {
+    width: 10ch;
+}
+
+.videoList th.thumbnail {
+    width: 145px;
+}
+
 img.thumbnail  {
     height: 100px;
 }
@@ -14,4 +38,23 @@ img.thumbnail  {
 .secondary {
     font-size: 0.8em;
     line-height: 0.8em;
+}
+
+.searchbox {
+    width: 40vw;
+    font-size: 1rem;
+    background-color: transparent;
+    color: inherit;
+    margin-bottom: 8px;
+    padding: 4px 8px;
+    border: 1px solid;
+}
+
+.searchbar {
+    display: flex;
+    justify-content: space-between;
+}
+
+.videocount {
+    width:15vw;
 }
