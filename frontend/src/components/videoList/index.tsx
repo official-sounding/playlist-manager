@@ -2,14 +2,13 @@ import { Download } from '../download';
 
 import classes from './styles.module.css';
 import { TagList } from './tagList';
-import { useAppDispatch, useAppSelector } from '../../store';
+import { useAppSelector } from '../../store';
 import { useMemo, useState } from 'react';
-import { updateShowThumbnails } from '../../store/slices/config';
+import { useLocalStorage } from 'usehooks-ts';
 
 export function VideoList() {
-    const dispatch = useAppDispatch();
 
-    const { showThumbnails } = useAppSelector((state) => state.config);
+    const [showThumbnails, setShowThumbnails] = useLocalStorage('show-thumbnails', true);
     const allVideos = useAppSelector((state) => state.video.allVideos);
     const [search, setSearch] = useState<string>('');
 
@@ -25,16 +24,16 @@ export function VideoList() {
     }, [search, allVideos]);
 
     return (
-        <>
+        <div>
             <Download />
             <hr />
             <div className={classes.searchbar}>
-                <input value={search} placeholder='Type here to search' onChange={e => setSearch(e.target.value)} className={classes.searchbox} />
-                <div className={classes.videocount}>{videos.length} Videos {search.length > 0 && `${allVideos.length} total`}</div>
+                
+                
             </div>
             <div>
                 <label>
-                    <input type="checkbox" checked={showThumbnails} onChange={(e) => dispatch(updateShowThumbnails(e.target.checked))} />
+                    <input type="checkbox" checked={showThumbnails} onChange={(e) => setShowThumbnails(e.target.checked)} />
                     Show Thumbnails
                 </label>
             </div>
@@ -43,6 +42,14 @@ export function VideoList() {
             <table className={classes.videoList}>
                 <thead>
                     <tr>
+                        <th colSpan={showThumbnails ? 2 : 1}>
+                        <input value={search} placeholder='Type here to search' onChange={e => setSearch(e.target.value)} className={classes.searchbox} />
+                        </th>
+                        <th colSpan={2}>
+                        <div className={classes.videocount}>{videos.length} Videos {search.length > 0 && `${allVideos.length} total`}</div>
+                        </th>
+                    </tr>
+                    <tr className={classes.bottomHeader}>
                         { showThumbnails && <th className={classes.thumbnail}>Thumbnail</th> }
                         <th>Title</th>
                         <th className={classes.details}>Details</th>
@@ -66,6 +73,6 @@ export function VideoList() {
                     ))}
                 </tbody>
             </table>
-        </>
+        </div>
     );
 }

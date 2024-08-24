@@ -1,0 +1,20 @@
+.footer {
+    height: 50px;
+    margin-top: -50px;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+}
+
+.content {
+    margin: 0 auto;
+    max-width: 80vw;
+}
+
+@media (prefers-color-scheme: dark) {
+    .footer {
+        background: #0d1117;
+        border-top: 1px solid #c9d1d9;
+    }
+}
