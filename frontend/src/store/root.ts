@@ -1,11 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
 import config from './slices/config';
+import playlist from './slices/playlist';
 import tag from './slices/tag';
 import video from './slices/video';
 
 export const store = configureStore({
     reducer: {
         config,
+        playlist,
         tag,
         video
     },
