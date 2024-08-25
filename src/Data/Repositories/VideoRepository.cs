@@ -41,7 +41,7 @@ public class VideoRepository(IDbContext dbContext) : IVideoRepository
 
 
             transaction.Commit();
-            return video with {  tags = request.tags?.ToImmutableArray() };
+            return video with { tags = request.tags?.ToImmutableArray() };
         }
         catch
         {
@@ -142,6 +142,7 @@ public record VideoTagDTO(Video video, Tag tag)
     public static IEnumerable<Video> MapDTOs(IEnumerable<VideoTagDTO> dtos)
     {
         return dtos
+            .Where(vt => vt.video != null)
             .GroupBy(vt => vt.video)
             .Select(grp =>
             {
