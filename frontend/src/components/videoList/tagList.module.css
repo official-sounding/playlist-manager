@@ -12,9 +12,8 @@
 }
 
 .tagSelect {
-    background-color: transparent;
-    color: inherit;
     border: 1px solid;
+    margin-bottom: 4px;
 }
 
 .submitBtn {
@@ -22,4 +21,11 @@
     color: inherit;
     border: 1px solid;
     border-left: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+    .tagSelect {
+        background: #0d1117;
+        color: inherit;
+    }
 }

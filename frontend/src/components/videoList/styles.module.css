@@ -32,6 +32,10 @@
     width: 145px;
 }
 
+.videoList td {
+    border: 1px solid gray;
+}
+
 img.thumbnail  {
     height: 100px;
 }
@@ -45,6 +49,11 @@ img.thumbnail  {
 .secondary {
     font-size: 0.8em;
     line-height: 0.8em;
+}
+
+.actions {
+    display: flex;
+    justify-content: space-around;
 }
 
 .searchbox {

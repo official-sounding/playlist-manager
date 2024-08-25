@@ -1,31 +1,40 @@
-import { useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store';
 import styles from './playlistFooter.module.css';
-import { selectPlaylist } from '../../store/slices/playlist';
+import { createPlaylist, selectPlaylist, updatePlaylist } from '../../store/slices/playlist';
 
 export function PlaylistFooter() {
-    const { allPlaylists, selectedPlaylistId, draftPlaylistVideoIds } = useAppSelector((state) => state.playlist);
+    const { allPlaylists, selectedPlaylistId, draftPlaylistVideoIds, draftDirty } = useAppSelector((state) => state.playlist);
     const dispatch = useAppDispatch();
 
-    const playlistList = useMemo(() => Object.values(allPlaylists), [allPlaylists]);
+    const playlistId = selectedPlaylistId ?? -1;
 
     const addPlaylist = () => {
+        const title = prompt('Enter the playlist title');
+        if(title) {
+            dispatch(createPlaylist({ title }));
+        }
+    }
 
+    const syncPlaylist = () => {
+        dispatch(updatePlaylist());
     }
 
     return <footer className={styles.footer}>
         <div className={styles.content}>
             <div>
                 <select 
-                value={selectedPlaylistId} 
+                value={playlistId} 
                 onChange={(e) => dispatch(selectPlaylist(Number(e.target.value)))}>
-                    <option value="" disabled selected>Select Playlist</option>
-                    {playlistList.map(p => <option value={p.id}>{p.title}</option>)}
+                    <option value={-1} disabled>Select a Playlist</option>
+                    {allPlaylists.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
                 </select>
-            </div>
-            <div>
                 <button onClick={addPlaylist}>Add New</button>
             </div>
+            {selectedPlaylistId && <div>
+                {draftPlaylistVideoIds.length} videos 
+                {(!draftDirty && draftPlaylistVideoIds.length > 0) && <a href={`/api/playlist/${selectedPlaylistId}/playlist.m3u8`}>Download m3u8 file</a>}
+                </div>}
+                {draftDirty && <button onClick={syncPlaylist}>Sync Entries</button>}
         </div>
         
     </footer>

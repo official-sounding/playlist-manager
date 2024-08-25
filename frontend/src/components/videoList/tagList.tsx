@@ -33,22 +33,22 @@ export function TagList({ video }: Args) {
     }
 
     return (
-        <>
+        <div>
             <ul className={styles.tagList}>
                 {video.tags.map((t) => (
-                    <li>{t.title} <button className={styles.removeBtn} onClick={() => removeTag(t)}>&times;</button></li>
+                    <li key={t.id}>{t.title} <button className={styles.removeBtn} onClick={() => removeTag(t)}>&times;</button></li>
                 ))}
             </ul>
             {availableTags.length > 0 && (
                 <form onSubmit={submit}>
                     <select className={styles.tagSelect} name='tagId'>
                         {availableTags.map((t) => (
-                            <option value={t.id}>{t.title}</option>
+                            <option key={t.id} value={t.id}>{t.title}</option>
                         ))}
                     </select>
                     <button className={styles.submitBtn} type='submit'>Add</button>
                 </form>
             )}
-        </>
+        </div>
     );
 }
