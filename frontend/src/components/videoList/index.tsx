@@ -4,9 +4,9 @@ import classes from './styles.module.css';
 import { TagList } from './tagList';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { useMemo, useState } from 'react';
-import { useLocalStorage } from 'usehooks-ts';
+import { useDebounceCallback, useLocalStorage } from 'usehooks-ts';
 import { Video } from '../../model/video';
-import { addVideoToDraft, removeVideoFromDraft } from '../../store/slices/playlist';
+import { addVideoToDraft, removeVideoFromDraft, updatePlaylist } from '../../store/slices/playlist';
 
 type EnrichedVideo = Video & { inPlaylist: boolean };
 
@@ -34,12 +34,16 @@ export function VideoList() {
             .map(enrich(draftPlaylistVideoIds))
     }, [search, allVideos, draftPlaylistVideoIds]);
 
+    const debouncedSync = useDebounceCallback(() => dispatch(updatePlaylist()), 5000, { maxWait: 30000 });
+
     const addVideo = (v: Video) => {
         dispatch(addVideoToDraft({ videoId: v.id }));
+        debouncedSync();
     }
 
     const removeVideo = (v: Video) => {
         dispatch(removeVideoFromDraft(v.id));
+        debouncedSync();
     }
 
 
