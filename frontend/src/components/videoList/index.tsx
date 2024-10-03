@@ -80,7 +80,7 @@ export function VideoList() {
                     {videos.map((v) => (
                         <tr key={v.id}>
                             { showThumbnails && <td>
-                             <img src={v.thumbnailUrl} className={classes.thumbnail} />
+                             <img src={v.thumbnailUrl} className={classes.thumbnail} loading="lazy" />
                             </td>}
                             <td className={classes.videoDetails}>
                                 <a href={v.videoUrl} target='_blank'>{v.title}</a>
