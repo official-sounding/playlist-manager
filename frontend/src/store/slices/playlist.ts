@@ -4,6 +4,7 @@ import { playlistGet } from '../../api/playlist/get';
 import { applyThunk, SliceWithRequest } from '../thunk-utils';
 import { playlistCreate } from '../../api/playlist/create';
 import { playlistUpdate, PlaylistUpdateRequest } from '../../api/playlist/update';
+import { arrayMove } from '@dnd-kit/sortable';
 
 export type PlaylistSlice = SliceWithRequest & {
     allPlaylists: Playlist[];
@@ -105,6 +106,14 @@ export const playlistSlice = createSlice({
 
             state.draftDirty = true;
         },
+        reorderVideoInDraft: (state, { payload }: PayloadAction<{ active: number; over: number; }>) => {
+            const { active, over } = payload;
+            const oldIndex = state.draftPlaylistVideoIds.indexOf(active);
+            const newIndex = state.draftPlaylistVideoIds.indexOf(over);
+
+            state.draftPlaylistVideoIds = arrayMove(state.draftPlaylistVideoIds, oldIndex, newIndex);
+            state.draftDirty = true;
+        }
     },
     extraReducers: (builder) => {
         applyThunk(builder, getAllPlaylists, (state, payload) => (state.allPlaylists = payload));
@@ -122,7 +131,7 @@ export const playlistSlice = createSlice({
     },
 });
 
-export const { selectPlaylist, addVideoToDraft, removeVideoFromDraft } = playlistSlice.actions;
+export const { selectPlaylist, addVideoToDraft, removeVideoFromDraft, reorderVideoInDraft } = playlistSlice.actions;
 export { getAllPlaylists, createPlaylist, updatePlaylist };
 
 export default playlistSlice.reducer;
