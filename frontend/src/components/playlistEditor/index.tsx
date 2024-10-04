@@ -1,6 +1,6 @@
 import { Video } from '../../model/video';
 import { useAppDispatch, useAppSelector } from '../../store';
-import { hydratedDraftPlaylist } from '../../store/selectors';
+import { currentPlaylistTitle, hydratedDraftPlaylistEntries } from '../../store/selectors';
 import { updateView } from '../../store/slices/config';
 
 import { CSS } from '@dnd-kit/utilities';
@@ -19,9 +19,13 @@ import {
     useSortable,
     verticalListSortingStrategy,
   } from '@dnd-kit/sortable';
-import { reorderVideoInDraft } from '../../store/slices/playlist';
+import { removeVideoFromDraft, reorderVideoInDraft } from '../../store/slices/playlist';
+
+import styles from './playlistEditor.module.css';
+import { useMemo } from 'react';
 
 function SortableItem({ video }: { video: Video }) {
+    const dispatch = useAppDispatch();
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: video.id });
 
     const style = {
@@ -29,9 +33,19 @@ function SortableItem({ video }: { video: Video }) {
         transition,
     };
 
+    const removeVideo = () => {
+        dispatch(removeVideoFromDraft(video.id));
+    }
+
     return (
-        <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-            {video.title}
+        <div ref={setNodeRef} style={style} className={styles.videoItem} {...attributes} {...listeners}>
+            <div>
+            <a href={video.videoUrl} target='_blank'>{video.title}</a> ({video.duration} sec)
+            </div>
+            <div>
+                <button onClick={removeVideo}>&times;</button>
+            </div>
+
         </div>
     );
 }
@@ -46,7 +60,10 @@ export function PlaylistEditor() {
         })
       );
 
-    const playlist = useAppSelector(hydratedDraftPlaylist);
+    const title = useAppSelector(currentPlaylistTitle);
+    const playlistVideos = useAppSelector(hydratedDraftPlaylistEntries);
+
+    const totalDuration = useMemo(() => playlistVideos.reduce((p,c) => p+c.duration, 0), [playlistVideos]);
 
     function handleDragEnd(event: DragEndEvent) {
         const {active, over} = event;
@@ -59,18 +76,21 @@ export function PlaylistEditor() {
 
     return (
         <>
-            <h1>Playlist Editor</h1>
+            <h1>Playlist: {title}</h1>
+            <h2>{playlistVideos.length} entries &mdash; {totalDuration} seconds</h2>
             <button onClick={returnToVideos}>&lt;&lt; Return to Video List</button>
+
+            <hr />
             <DndContext 
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
       <SortableContext 
-        items={playlist}
+        items={playlistVideos}
         strategy={verticalListSortingStrategy}
       >
-        {playlist.map(video => <SortableItem key={video.id} video={video} />)}
+        {playlistVideos.map(video => <SortableItem key={video.id} video={video} />)}
       </SortableContext>
     </DndContext>
         </>

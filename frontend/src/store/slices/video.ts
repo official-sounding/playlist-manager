@@ -9,11 +9,11 @@ import { videoTagRemove } from "../../api/video/tagRemove";
 
 export type VideoSlice = SliceWithRequest & {
     allVideos: Video[],
-    videoIdMap: Map<number, Video>,
+    videoIdMap: Record<number, Video>,
     downloadRequests: Record<string, QueueDetails>,
 };
 
-const initialState: VideoSlice = { allVideos: [], videoIdMap: new Map<number, Video>(), requestState: { }, downloadRequests: { } };
+const initialState: VideoSlice = { allVideos: [], videoIdMap: {}, requestState: { }, downloadRequests: { } };
 
 const getAllVideos = createAsyncThunk('video/allVideos', videoGet)
 const getVideoStatus = createAsyncThunk('video/getVideoStatus', jobFromId)
@@ -35,10 +35,10 @@ export const tagSlice = createSlice({
     extraReducers: (builder) => {
         applyThunk(builder, getAllVideos, (state, payload) => { 
             state.allVideos = payload 
-            state.videoIdMap = payload.reduce((prev, curr) => {
-                prev.set(curr.id, curr);
+            state.videoIdMap = payload.reduce<Record<number, Video>>((prev, curr) => {
+                prev[curr.id] = curr;
                 return prev;
-            }, new Map<number, Video>())
+            }, {})
 
         });
         applyThunk(builder, getVideoStatus, (state, payload) => state.downloadRequests[payload.job.id] = payload);

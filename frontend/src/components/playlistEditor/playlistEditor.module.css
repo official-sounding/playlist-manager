@@ -1,0 +1,8 @@
+.videoItem {
+    padding: 8px;
+    border: 1px solid #ccc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+}
