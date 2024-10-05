@@ -1,7 +1,6 @@
 import { Video } from '../../model/video';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { currentPlaylistTitle, hydratedDraftPlaylistEntries } from '../../store/selectors';
-import { updateView } from '../../store/slices/config';
 
 import { CSS } from '@dnd-kit/utilities';
 import {
@@ -52,7 +51,6 @@ function SortableItem({ video }: { video: Video }) {
 
 export function PlaylistEditor() {
     const dispatch = useAppDispatch();
-    const returnToVideos = () => dispatch(updateView('video'));
     const sensors = useSensors(
         useSensor(PointerSensor),
         useSensor(KeyboardSensor, {
@@ -78,7 +76,6 @@ export function PlaylistEditor() {
         <>
             <h1>Playlist: {title}</h1>
             <h2>{playlistVideos.length} entries &mdash; {totalDuration} seconds</h2>
-            <button onClick={returnToVideos}>&lt;&lt; Return to Video List</button>
 
             <hr />
             <DndContext 
