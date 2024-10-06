@@ -18,11 +18,12 @@ import {
     useSortable,
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { removeVideoFromDraft, reorderVideoInDraft } from '../../store/slices/playlist';
+import { addVideoToDraft, removeVideoFromDraft, reorderVideoInDraft } from '../../store/slices/playlist';
 
 import styles from './playlistEditor.module.css';
 import { useMemo } from 'react';
 import { prettyPrintDuration } from '../../utils/prettyPrintDuration';
+import { VideoSearch } from './videoSearch';
 
 function SortableItem({ video }: { video: Video }) {
     const dispatch = useAppDispatch();
@@ -86,6 +87,11 @@ export function PlaylistEditor() {
         }
     }
 
+    function onSearchSelect(video: Video) {
+        dispatch(addVideoToDraft({ videoId: video.id }));
+        syncPlaylist();
+    }
+
     return (
         <>
             <h1>Playlist: {title}</h1>
@@ -94,6 +100,7 @@ export function PlaylistEditor() {
             </h2>
 
             <hr />
+            <VideoSearch onSelect={onSearchSelect} />
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={playlistVideos} strategy={verticalListSortingStrategy}>
                     {playlistVideos.map((video) => (

@@ -1,0 +1,23 @@
+.input {
+    margin-bottom: 16px;
+    height: 32px;
+}
+
+.input :global(.wrapper) {
+    border-radius: 0 !important;
+}
+
+.input :global(.wrapper) > div {
+    min-height: 32px;
+}
+
+@media (prefers-color-scheme: dark) {
+    .input :global(.wrapper) {
+        background: #0d1117 !important;
+        color: inherit !important;
+    }
+
+    .input :global(.wrapper) input {
+        color: inherit !important;
+    }
+}
