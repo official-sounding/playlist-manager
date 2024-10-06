@@ -89,7 +89,7 @@ export function VideoList() {
                             <td className={classes.videoDetails}>
                                 <a href={v.videoUrl} target='_blank'>{v.title}</a>
                             </td>
-                            <td className={classes.secondary}>{v.duration} sec</td>
+                            <td className={classes.secondary}>{v.prettyDuration}</td>
                             <td className={`${classes.secondary} ${classes.actions}`}>
                                 <TagList video={v} />
                                 {selectedPlaylistId && <div>

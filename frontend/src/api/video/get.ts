@@ -1,7 +1,15 @@
-import { Video } from '../../model/video';
+import { RawVideo, Video } from '../../model/video';
+import { prettyPrintDuration } from '../../utils/prettyPrintDuration';
 
 export const videoGet = async () => {
     const res = await fetch('/api/video');
-    const result = (await res.json()) as unknown as Video[];
-    return result;
+    const result = (await res.json()) as unknown as RawVideo[];
+    return result.map(enrichVideo);
+};
+
+export function enrichVideo(raw: RawVideo): Video {
+    return {
+        ...raw,
+        prettyDuration: prettyPrintDuration(raw.duration),
+    };
 }

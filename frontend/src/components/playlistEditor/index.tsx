@@ -22,6 +22,7 @@ import { removeVideoFromDraft, reorderVideoInDraft } from '../../store/slices/pl
 
 import styles from './playlistEditor.module.css';
 import { useMemo } from 'react';
+import { prettyPrintDuration } from '../../utils/prettyPrintDuration';
 
 function SortableItem({ video }: { video: Video }) {
     const dispatch = useAppDispatch();
@@ -39,7 +40,7 @@ function SortableItem({ video }: { video: Video }) {
     return (
         <div ref={setNodeRef} style={style} className={styles.videoItem} {...attributes} {...listeners}>
             <div>
-            <a href={video.videoUrl} target='_blank'>{video.title}</a> ({video.duration} sec)
+            <a href={video.videoUrl} target='_blank'>{video.title}</a> ({video.prettyDuration})
             </div>
             <div>
                 <button onClick={removeVideo}>&times;</button>
@@ -61,7 +62,7 @@ export function PlaylistEditor() {
     const title = useAppSelector(currentPlaylistTitle);
     const playlistVideos = useAppSelector(hydratedDraftPlaylistEntries);
 
-    const totalDuration = useMemo(() => playlistVideos.reduce((p,c) => p+c.duration, 0), [playlistVideos]);
+    const totalDuration = useMemo(() => prettyPrintDuration(playlistVideos.reduce((p,c) => p+c.duration, 0)), [playlistVideos]);
 
     function handleDragEnd(event: DragEndEvent) {
         const {active, over} = event;
@@ -75,7 +76,7 @@ export function PlaylistEditor() {
     return (
         <>
             <h1>Playlist: {title}</h1>
-            <h2>{playlistVideos.length} entries &mdash; {totalDuration} seconds</h2>
+            <h2>{playlistVideos.length} entries &mdash; {totalDuration}</h2>
 
             <hr />
             <DndContext 
