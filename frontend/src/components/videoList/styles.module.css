@@ -9,14 +9,12 @@
     top: 0; /* Don't forget this, required for the stickiness */
     background-color: inherit;
     padding-top: 8px;
-    
 }
 
 @media (prefers-color-scheme: dark) {
     .videoList thead {
         color: #c9d1d9;
         background: #0d1117;
-        
     }
 }
 
@@ -36,7 +34,7 @@
     border: 1px solid gray;
 }
 
-img.thumbnail  {
+img.thumbnail {
     height: 100px;
 }
 
@@ -44,6 +42,11 @@ img.thumbnail  {
     padding-left: 10px;
     font-size: 0.9em;
     padding-bottom: 12px;
+    display: inline-flex;
+}
+
+.videoDetails .playlistControls {
+    margin-right: 8px;
 }
 
 .secondary {
@@ -72,5 +75,5 @@ img.thumbnail  {
 }
 
 .videocount {
-    width:15vw;
+    width: 15vw;
 }

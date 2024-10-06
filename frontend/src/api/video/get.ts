@@ -1,3 +1,4 @@
+import { Tag } from '../../model/tag';
 import { RawVideo, Video } from '../../model/video';
 import { prettyPrintDuration } from '../../utils/prettyPrintDuration';
 
@@ -10,6 +11,11 @@ export const videoGet = async () => {
 export function enrichVideo(raw: RawVideo): Video {
     return {
         ...raw,
+        tags: raw.tags.sort(sortTags),
         prettyDuration: prettyPrintDuration(raw.duration),
     };
+}
+
+function sortTags(a: Tag, b: Tag) {
+    return a.title.localeCompare(b.title);
 }

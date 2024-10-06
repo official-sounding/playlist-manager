@@ -16,7 +16,7 @@ public class TagRepository(IDbContext dbContext) : ITagRepository
     public async Task<IEnumerable<Tag>> AllAsync()
     {
         using var conn = dbContext.DbConnection;
-        return await conn.QueryAsync<Tag>("select * from tag");
+        return await conn.QueryAsync<Tag>("select * from tag order by title");
     }
 
     public async Task<Tag?> ByIdAsync(long id)

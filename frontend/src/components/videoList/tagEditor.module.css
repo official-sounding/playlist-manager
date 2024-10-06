@@ -1,0 +1,19 @@
+.tagSelect {
+    border: 1px solid;
+    margin-bottom: 4px;
+}
+
+.tagEditor {
+    display: inline-block;
+}
+
+.submitBtn {
+    border-left: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+    .tagSelect {
+        background: #0d1117;
+        color: inherit;
+    }
+}

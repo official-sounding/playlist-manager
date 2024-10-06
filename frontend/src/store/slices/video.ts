@@ -43,11 +43,17 @@ export const tagSlice = createSlice({
         applyThunk(builder, getVideoStatus, (state, payload) => (state.downloadRequests[payload.job.id] = payload));
         applyThunk(builder, addTagToVideo, (state, payload) => {
             const video = state.allVideos.find((v) => v.id === payload.videoId);
-            video?.tags.push(payload.tag);
+            if (video) {
+                video.tags.push(payload.tag);
+                video.tags.sort((a, b) => a.title.localeCompare(b.title));
+            }
         });
         applyThunk(builder, createTagForVideo, (state, payload) => {
             const video = state.allVideos.find((v) => v.id === payload.videoId);
-            video?.tags.push(payload.tag);
+            if (video) {
+                video.tags.push(payload.tag);
+                video.tags.sort((a, b) => a.title.localeCompare(b.title));
+            }
         });
         applyThunk(builder, removeTagFromVideo, (state, payload) => {
             const video = state.allVideos.find((v) => v.id === payload.videoId);

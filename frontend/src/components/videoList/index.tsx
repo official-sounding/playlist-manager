@@ -7,6 +7,7 @@ import { useMemo, useState } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 import { Video } from '../../model/video';
 import { addVideoToDraft, removeVideoFromDraft } from '../../store/slices/playlist';
+import { TagEditor } from './tagEditor';
 
 type EnrichedVideo = Video & { inPlaylist: boolean };
 
@@ -77,7 +78,7 @@ export function VideoList() {
                                 className={classes.searchbox}
                             />
                         </th>
-                        <th colSpan={2}>
+                        <th>
                             <div className={classes.videocount}>
                                 {videos.length} Videos {search.length > 0 && `${allVideos.length} total`}
                             </div>
@@ -86,7 +87,6 @@ export function VideoList() {
                     <tr className={classes.bottomHeader}>
                         {showThumbnails && <th className={classes.thumbnail}>Thumbnail</th>}
                         <th>Title</th>
-                        <th className={classes.details}>Details</th>
                         <th>Tags</th>
                     </tr>
                 </thead>
@@ -98,20 +98,27 @@ export function VideoList() {
                                     <img src={v.thumbnailUrl} className={classes.thumbnail} loading='lazy' />
                                 </td>
                             )}
-                            <td className={classes.videoDetails}>
-                                <a href={v.videoUrl} target='_blank'>
-                                    {v.title}
-                                </a>
-                            </td>
-                            <td className={classes.secondary}>{v.prettyDuration}</td>
-                            <td className={`${classes.secondary} ${classes.actions}`}>
-                                <TagList video={v} />
-                                {selectedPlaylistId && (
+                            <td>
+                                <div className={classes.videoDetails}>
+                                    {selectedPlaylistId && (
+                                        <div className={classes.playlistControls}>
+                                            {!v.inPlaylist && <button onClick={() => addVideo(v)}>+</button>}
+                                            {v.inPlaylist && <button onClick={() => removeVideo(v)}>&times;</button>}
+                                        </div>
+                                    )}
                                     <div>
-                                        {!v.inPlaylist && <button onClick={() => addVideo(v)}>+</button>}
-                                        {v.inPlaylist && <button onClick={() => removeVideo(v)}>&times;</button>}
+                                        <a href={v.videoUrl} target='_blank'>
+                                            {v.title}
+                                        </a>{' '}
+                                        <span className={classes.secondary}>({v.prettyDuration})</span>
+                                        <TagList video={v} />
                                     </div>
-                                )}
+                                </div>
+                            </td>
+                            <td>
+                                <div className={classes.actions}>
+                                    <TagEditor video={v} />
+                                </div>
                             </td>
                         </tr>
                     ))}

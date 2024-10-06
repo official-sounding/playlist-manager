@@ -42,7 +42,7 @@ function SortableItem({ video }: { video: Video }) {
     return (
         <div ref={setNodeRef} style={style} className={styles.videoItem}>
             <div>
-                <button {...attributes} {...listeners} className={styles.dragTarget}>
+                <button {...attributes} {...listeners} className={styles.dragHandle}>
                     D
                 </button>
                 <a href={video.videoUrl} target='_blank'>
@@ -51,7 +51,9 @@ function SortableItem({ video }: { video: Video }) {
                 ({video.prettyDuration})
             </div>
             <div>
-                <button onClick={removeVideo}>&times;</button>
+                <button className={styles.removeBtn} onClick={removeVideo}>
+                    &times;
+                </button>
             </div>
         </div>
     );
