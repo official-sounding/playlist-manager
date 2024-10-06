@@ -1,5 +1,5 @@
 import { Video } from '../../model/video';
-import { useAppDispatch, useAppSelector } from '../../store';
+import { useAppDispatch, useAppSelector, useDebouncedSync } from '../../store';
 import { currentPlaylistTitle, hydratedDraftPlaylistEntries } from '../../store/selectors';
 
 import { CSS } from '@dnd-kit/utilities';
@@ -26,6 +26,7 @@ import { prettyPrintDuration } from '../../utils/prettyPrintDuration';
 
 function SortableItem({ video }: { video: Video }) {
     const dispatch = useAppDispatch();
+    const syncPlaylist = useDebouncedSync();
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: video.id });
 
     const style = {
@@ -35,11 +36,15 @@ function SortableItem({ video }: { video: Video }) {
 
     const removeVideo = () => {
         dispatch(removeVideoFromDraft(video.id));
+        syncPlaylist();
     };
 
     return (
-        <div ref={setNodeRef} style={style} className={styles.videoItem} {...attributes} {...listeners}>
+        <div ref={setNodeRef} style={style} className={styles.videoItem}>
             <div>
+                <button {...attributes} {...listeners} className={styles.dragTarget}>
+                    D
+                </button>
                 <a href={video.videoUrl} target='_blank'>
                     {video.title}
                 </a>{' '}
@@ -54,6 +59,7 @@ function SortableItem({ video }: { video: Video }) {
 
 export function PlaylistEditor() {
     const dispatch = useAppDispatch();
+    const syncPlaylist = useDebouncedSync();
     const sensors = useSensors(
         useSensor(PointerSensor),
         useSensor(KeyboardSensor, {
@@ -74,6 +80,7 @@ export function PlaylistEditor() {
 
         if (active.id !== over?.id && typeof active.id === 'number' && typeof over?.id === 'number') {
             dispatch(reorderVideoInDraft({ active: active.id, over: over.id }));
+            syncPlaylist();
         }
     }
 

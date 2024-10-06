@@ -2,11 +2,11 @@ import { Download } from '../download';
 
 import classes from './styles.module.css';
 import { TagList } from './tagList';
-import { useAppDispatch, useAppSelector } from '../../store';
+import { useAppDispatch, useAppSelector, useDebouncedSync } from '../../store';
 import { useMemo, useState } from 'react';
-import { useDebounceCallback, useLocalStorage } from 'usehooks-ts';
+import { useLocalStorage } from 'usehooks-ts';
 import { Video } from '../../model/video';
-import { addVideoToDraft, removeVideoFromDraft, updatePlaylist } from '../../store/slices/playlist';
+import { addVideoToDraft, removeVideoFromDraft } from '../../store/slices/playlist';
 
 type EnrichedVideo = Video & { inPlaylist: boolean };
 
@@ -20,6 +20,7 @@ export function VideoList() {
     const allVideos = useAppSelector((state) => state.video.allVideos);
     const { selectedPlaylistId, draftPlaylistVideoIds } = useAppSelector((state) => state.playlist);
     const [search, setSearch] = useState<string>('');
+    const debouncedSync = useDebouncedSync();
 
     const videos = useMemo(() => {
         const searchValue = search.trim();
@@ -38,8 +39,6 @@ export function VideoList() {
             )
             .map(enrich(draftPlaylistVideoIds));
     }, [search, allVideos, draftPlaylistVideoIds]);
-
-    const debouncedSync = useDebounceCallback(() => dispatch(updatePlaylist()), 5000, { maxWait: 30000 });
 
     const addVideo = (v: Video) => {
         dispatch(addVideoToDraft({ videoId: v.id }));
@@ -109,10 +108,8 @@ export function VideoList() {
                                 <TagList video={v} />
                                 {selectedPlaylistId && (
                                     <div>
-                                        {!v.inPlaylist && <button onClick={() => addVideo(v)}>Add to Playlist</button>}
-                                        {v.inPlaylist && (
-                                            <button onClick={() => removeVideo(v)}>Remove from Playlist</button>
-                                        )}
+                                        {!v.inPlaylist && <button onClick={() => addVideo(v)}>+</button>}
+                                        {v.inPlaylist && <button onClick={() => removeVideo(v)}>&times;</button>}
                                     </div>
                                 )}
                             </td>

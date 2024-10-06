@@ -6,3 +6,9 @@
     align-items: center;
     font-size: 0.8rem;
 }
+
+.dragTarget {
+    margin-right: 16px;
+    color: inherit;
+    background-color: transparent;
+}

@@ -47,13 +47,13 @@ export function PlaylistFooter() {
                 </div>
                 {selectedPlaylistId && (
                     <div>
-                        {draftPlaylistVideoIds.length} videos
+                        {draftPlaylistVideoIds.length} videos{' '}
                         {!draftDirty && draftPlaylistVideoIds.length > 0 && (
                             <a href={`/api/playlist/${selectedPlaylistId}/playlist.m3u8`}>Download m3u8 file</a>
                         )}
+                        {draftDirty && <button onClick={syncPlaylist}>Sync Entries</button>}
                     </div>
                 )}
-                {draftDirty && <button onClick={syncPlaylist}>Sync Entries</button>}
                 <div>
                     {selectedPlaylistId && (
                         <button onClick={toggleView}>
