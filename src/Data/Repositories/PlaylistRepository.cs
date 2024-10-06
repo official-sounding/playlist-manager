@@ -87,7 +87,7 @@ public class PlaylistRepository(IDbContext dbContext) : IPlaylistRepository
             if (request?.toRemove?.Count > 0)
             {
                 tasks.Add(conn.ExecuteAsync(@"
-            DELETE FROM playlist_entry WHERE playlistId = @id and videoId = @videoId
+            DELETE FROM playlist_entry WHERE playlistId = @playlistId and videoId = @videoId
         ", request.toRemove.Select(videoId => new { playlistId, videoId }), transaction: transaction));
             }
 
