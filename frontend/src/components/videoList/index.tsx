@@ -79,14 +79,12 @@ export function VideoList() {
                             />
                         </th>
                         <th>
-                            <div className={classes.videocount}>
-                                {videos.length} Videos {search.length > 0 && `${allVideos.length} total`}
-                            </div>
+                            <div className={classes.videocount}>{search.length > 0 && `${videos.length} Videos`}</div>
                         </th>
                     </tr>
                     <tr className={classes.bottomHeader}>
                         {showThumbnails && <th className={classes.thumbnail}>Thumbnail</th>}
-                        <th>Title</th>
+                        <th>Title ({allVideos.length} total videos)</th>
                         <th>Tags</th>
                     </tr>
                 </thead>
@@ -102,8 +100,16 @@ export function VideoList() {
                                 <div className={classes.videoDetails}>
                                     {selectedPlaylistId && (
                                         <div className={classes.playlistControls}>
-                                            {!v.inPlaylist && <button onClick={() => addVideo(v)}>+</button>}
-                                            {v.inPlaylist && <button onClick={() => removeVideo(v)}>&times;</button>}
+                                            {!v.inPlaylist && (
+                                                <button className={classes.addBtn} onClick={() => addVideo(v)}>
+                                                    +
+                                                </button>
+                                            )}
+                                            {v.inPlaylist && (
+                                                <button className={classes.removeBtn} onClick={() => removeVideo(v)}>
+                                                    &times;
+                                                </button>
+                                            )}
                                         </div>
                                     )}
                                     <div>

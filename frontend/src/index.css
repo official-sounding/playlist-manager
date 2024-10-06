@@ -26,6 +26,13 @@ button {
     background-color: transparent;
     color: inherit;
     border: 1px solid;
+    line-height: 16px;
+}
+
+select {
+    border: 1px solid;
+    line-height: 1;
+    padding: 1px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -50,5 +57,10 @@ button {
     button:hover {
         background-color: #333333;
         color: #cccccc;
+    }
+
+    select {
+        background: #0d1117;
+        color: inherit;
     }
 }

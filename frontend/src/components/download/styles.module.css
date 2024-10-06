@@ -16,13 +16,8 @@
 
 .download {
     font-size: 1.4rem;
-    background-color: transparent;
-    color: inherit;
     border: 1px solid;
     border-left: 0;
     padding: 4px 8px;
-}
-
-.download:hover {
-    cursor: pointer;
+    line-height: normal;
 }

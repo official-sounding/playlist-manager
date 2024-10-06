@@ -8,11 +8,6 @@ export type TagSlice = SliceWithRequest & {
 };
 
 const initialState: TagSlice = { allTags: [], requestState: {} };
-
-/*const { currentRequestId, loading } = getState().users
-  if (loading !== 'pending' || requestId !== currentRequestId) {
-    return
-  } */
 const getAllTags = createAsyncThunk('tag/allTags', async () => getTags());
 
 export const tagSlice = createSlice({

@@ -33,7 +33,10 @@ export function PlaylistFooter() {
         <footer className={styles.footer}>
             <div className={styles.content}>
                 <div>
-                    <select value={playlistId} onChange={(e) => dispatch(selectPlaylist(Number(e.target.value)))}>
+                    <select
+                        value={playlistId}
+                        className={styles.playlistSelect}
+                        onChange={(e) => dispatch(selectPlaylist(Number(e.target.value)))}>
                         <option value={-1} disabled>
                             Select a Playlist
                         </option>
@@ -47,7 +50,7 @@ export function PlaylistFooter() {
                 </div>
                 {selectedPlaylistId && (
                     <div>
-                        {draftPlaylistVideoIds.length} videos{' '}
+                        {draftPlaylistVideoIds.length} videos&nbsp;
                         {!draftDirty && draftPlaylistVideoIds.length > 0 && (
                             <a href={`/api/playlist/${selectedPlaylistId}/playlist.m3u8`}>Download m3u8 file</a>
                         )}

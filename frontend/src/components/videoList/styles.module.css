@@ -77,3 +77,11 @@ img.thumbnail {
 .videocount {
     width: 15vw;
 }
+
+.addBtn {
+    color: forestgreen;
+}
+
+.removeBtn {
+    color: crimson;
+}
