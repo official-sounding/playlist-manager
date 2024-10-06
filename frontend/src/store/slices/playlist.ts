@@ -106,14 +106,14 @@ export const playlistSlice = createSlice({
 
             state.draftDirty = true;
         },
-        reorderVideoInDraft: (state, { payload }: PayloadAction<{ active: number; over: number; }>) => {
+        reorderVideoInDraft: (state, { payload }: PayloadAction<{ active: number; over: number }>) => {
             const { active, over } = payload;
             const oldIndex = state.draftPlaylistVideoIds.indexOf(active);
             const newIndex = state.draftPlaylistVideoIds.indexOf(over);
 
             state.draftPlaylistVideoIds = arrayMove(state.draftPlaylistVideoIds, oldIndex, newIndex);
             state.draftDirty = true;
-        }
+        },
     },
     extraReducers: (builder) => {
         applyThunk(builder, getAllPlaylists, (state, payload) => (state.allPlaylists = payload));

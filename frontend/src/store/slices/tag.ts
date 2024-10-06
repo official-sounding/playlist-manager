@@ -3,28 +3,25 @@ import { getTags } from '../../api/tag/get';
 import { applyThunk, SliceWithRequest } from '../thunk-utils';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
-
-
 export type TagSlice = SliceWithRequest & {
-    allTags: Tag[],
+    allTags: Tag[];
 };
 
-const initialState: TagSlice = { allTags: [], requestState: { } };
+const initialState: TagSlice = { allTags: [], requestState: {} };
 
 /*const { currentRequestId, loading } = getState().users
   if (loading !== 'pending' || requestId !== currentRequestId) {
     return
   } */
-const getAllTags = createAsyncThunk('tag/allTags', async () => getTags())
+const getAllTags = createAsyncThunk('tag/allTags', async () => getTags());
 
 export const tagSlice = createSlice({
     name: 'tag',
     initialState,
-    reducers: {
-    },
+    reducers: {},
     extraReducers: (builder) => {
-        applyThunk(builder, getAllTags, (state, payload) => state.allTags = payload);
-      },
+        applyThunk(builder, getAllTags, (state, payload) => (state.allTags = payload));
+    },
 });
 
 export { getAllTags };

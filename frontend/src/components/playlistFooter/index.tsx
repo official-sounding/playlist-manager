@@ -25,7 +25,7 @@ export function PlaylistFooter() {
     };
 
     const toggleView = () => {
-        const newView:View = view === 'playlist' ? 'video' : 'playlist';
+        const newView: View = view === 'playlist' ? 'video' : 'playlist';
         dispatch(updateView(newView));
     };
 
@@ -55,7 +55,11 @@ export function PlaylistFooter() {
                 )}
                 {draftDirty && <button onClick={syncPlaylist}>Sync Entries</button>}
                 <div>
-                    {selectedPlaylistId && <button onClick={toggleView}>{view === 'video' ? 'Open Playlist Editor' : 'Return to Video List'}</button>}
+                    {selectedPlaylistId && (
+                        <button onClick={toggleView}>
+                            {view === 'video' ? 'Open Playlist Editor' : 'Return to Video List'}
+                        </button>
+                    )}
                 </div>
             </div>
         </footer>
