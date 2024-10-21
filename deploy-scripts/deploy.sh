@@ -12,4 +12,4 @@ cp /opt/playlist-manager/appsettings.json /opt/playlist-manager/app/
 chown :pl-svc /opt/playlist-manager/app/*
 chmod 774 /opt/playlist-manager/app/*
 
-service restart playlist-manager
+service playlist-manager restart
