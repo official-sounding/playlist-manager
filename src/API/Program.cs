@@ -43,6 +43,9 @@ builder.Services.AddLogging(lb =>
     });
 });
 
+builder.Services.AddHealthChecks()
+    .AddCheck<DBHealthCheck>("DB");
+
 builder.Services.AddSingleton<IDbContext, SqliteDbContext>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<IVideoJobQueue, VideoJobQueue>();
@@ -70,6 +73,9 @@ if (app.Environment.IsDevelopment())
 app.UseMiddleware<OperationCanceledMiddleware>();
 
 app.MapControllers();
+
+app.MapHealthChecks("/api/health/ready");
+
 app.MapGet("/api/video/job/stream", async (
   [FromServices] IVideoJobQueue queue,
   [FromServices] IHttpContextAccessor accessor,
