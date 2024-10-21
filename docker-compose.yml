@@ -1,0 +1,16 @@
+services:
+  api:
+    build: src/.
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "5125:5125"
+    volumes:
+      - ./src:/app
+      - C:/videos/testing:/videos
+      - /app/Data/obj/ # <- directory won't be mounted
+      - /app/Data/bin/ # <- directory won't be mounted
+      - /app/Migrations/obj/ # <- directory won't be mounted
+      - /app/Migrations/bin/ # <- directory won't be mounted
+      - /app/API/obj/ # <- directory won't be mounted
+      - /app/API/bin/ # <- directory won't be mounted
