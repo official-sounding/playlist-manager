@@ -19,7 +19,7 @@ public partial class VideoService(YoutubeDLWrapper wrapper, IVideoRepository rep
     [GeneratedRegex(@".*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*")]
     private static partial Regex urlMapper();
 
-    public async Task<bool> ValidateDownload(string url, CancellationToken ct = default) 
+    public async Task<bool> ValidateDownload(string url, CancellationToken ct = default)
     {
         var id = ExtractIdFromUrl(url);
         var exists = id == null ? null : await repo.GetByYTIdAsync(id);
@@ -31,10 +31,13 @@ public partial class VideoService(YoutubeDLWrapper wrapper, IVideoRepository rep
         var dl = await wrapper.DownloadWithDataAsync(url, outputHandler, ct);
         var exists = await repo.GetByYTIdAsync(dl.metadata.id);
 
-        if(exists is null) {
-            var createRequest = new VideoCreateRequest(dl.metadata.id, dl.filename, dl.metadata.title, dl.metadata.artist, dl.metadata.duration, dl.metadata.uploadedAt, tags);
+        if (exists is null)
+        {
+            var createRequest = new VideoCreateRequest(dl.metadata.id, dl.filename, dl.metadata.title, dl.metadata.artist, dl.metadata.duration, dl.metadata.uploadedAt, dl.metadata.service, tags);
             return await repo.AddAsync(createRequest);
-        } else {
+        }
+        else
+        {
             return exists;
         }
     }
@@ -50,14 +53,15 @@ public partial class VideoService(YoutubeDLWrapper wrapper, IVideoRepository rep
 
         var data = await wrapper.GetVideoDataAsync(url, ct);
 
-        var createRequest = new VideoCreateRequest(data.ID, Path.GetFileName(filename), data.Title, data.Artist, data.Duration, data.UploadDate, tags);
+        var createRequest = new VideoCreateRequest(data.ID, Path.GetFileName(filename), data.Title, data.Artist, data.Duration, data.UploadDate, Service.YouTube, tags);
 
         await repo.AddAsync(createRequest);
 
         return true;
     }
 
-    public async Task<FileStream?> FileStreamById(long id, CancellationToken ct = default) {
+    public async Task<FileStream?> FileStreamById(long id, CancellationToken ct = default)
+    {
         var entry = await repo.GetByIdAsync(id);
 
         if (entry == null) return null;
@@ -65,10 +69,13 @@ public partial class VideoService(YoutubeDLWrapper wrapper, IVideoRepository rep
         var fullPath = Path.Combine(wrapper.OutputPath, entry.filename);
 
 
-        try {
+        try
+        {
             var file = File.OpenRead(fullPath);
             return file;
-        } catch {
+        }
+        catch
+        {
             return null;
         }
 
@@ -85,10 +92,12 @@ public partial class VideoService(YoutubeDLWrapper wrapper, IVideoRepository rep
         return null;
     }
 
-    public string? ExtractIdFromUrl(string url) {
+    public string? ExtractIdFromUrl(string url)
+    {
         var match = urlMapper().Match(url);
 
-        if(match.Success) {
+        if (match.Success)
+        {
             return match.Groups[1].Value;
         }
 

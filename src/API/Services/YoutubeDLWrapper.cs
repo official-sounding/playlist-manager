@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using PlaylistManager.Data.Models;
 using YoutubeDLSharp;
 using YoutubeDLSharp.Metadata;
 using YoutubeDLSharp.Options;
@@ -25,11 +26,28 @@ public class YoutubeDLWrapper
     {
         var output = new Progress<string>(outputHandler);
         var dl = await ytdl.RunVideoDownload(url, recodeFormat: VideoRecodeFormat.Mp4, output: output, ct: ct, overrideOptions: new OptionSet() { RestrictFilenames = true });
-        var data = await GetVideoDataAsync(url);
+        var data = await GetVideoDataAsync(url, ct);
 
         dl.EnsureSuccess();
 
-        return new YTDownloadResult(Path.GetFileName(dl.Data), new(data.ID, data.Title, data.Artist, data.Thumbnail, data.Duration, data.UploadDate));
+        var service = ServiceFromMetadata(data);
+
+        return new YTDownloadResult(Path.GetFileName(dl.Data), new(data.ID, data.Title, data.Artist, data.Thumbnail, data.Duration, data.UploadDate, service));
+    }
+
+    private Service ServiceFromMetadata(VideoData data)
+    {
+        if (data.WebpageUrl.Contains("vimeo.com", StringComparison.InvariantCultureIgnoreCase))
+        {
+            return Service.Vimeo;
+        }
+
+        if (data.WebpageUrl.Contains("youtube.com", StringComparison.InvariantCultureIgnoreCase))
+        {
+            return Service.YouTube;
+        }
+
+        return Service.Unknown;
     }
 
     public async Task<VideoData> GetVideoDataAsync(string url, CancellationToken ct = default)
@@ -50,4 +68,4 @@ public class YTConfig
 
 public record YTDownloadResult(string filename, VideoMetadata metadata);
 
-public record VideoMetadata(string id, string title, string artist, string thumbnail, float? duration, DateTime? uploadedAt);
+public record VideoMetadata(string id, string title, string artist, string thumbnail, float? duration, DateTime? uploadedAt, Service service);

@@ -29,8 +29,8 @@ public class VideoRepository(IDbContext dbContext) : IVideoRepository
         {
 
             var video = await conn.QueryFirstAsync<Video>(@"
-            INSERT INTO video (videoId, filename, title, artist, duration, uploadedAt) 
-            VALUES (@videoId,@filename,@title, @artist, @duration, @uploadedAt)
+            INSERT INTO video (videoId, filename, title, artist, duration, uploadedAt, service) 
+            VALUES (@videoId,@filename,@title, @artist, @duration, @uploadedAt, @service)
             RETURNING *
         ", request);
 
@@ -90,6 +90,7 @@ public class VideoRepository(IDbContext dbContext) : IVideoRepository
                 artist=@artist
                 duration=@duration
                 uploadedAt=@uploadedAt
+                service=@service
             WHERE id = @id
             ", video, transaction: transaction);
 
