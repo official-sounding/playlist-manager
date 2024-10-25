@@ -44,7 +44,9 @@ builder.Services.AddLogging(lb =>
 });
 
 builder.Services.AddHealthChecks()
-    .AddCheck<DBHealthCheck>("DB");
+    .AddCheck<DBHealthCheck>("DB")
+    .AddCheck<YTDLHealthCheck>("YTDL")
+    ;
 
 builder.Services.AddSingleton<IDbContext, SqliteDbContext>();
 builder.Services.AddSingleton(TimeProvider.System);
@@ -86,7 +88,8 @@ app.MapGet("/api/video/job/stream", async (
     var LINE_END = $"{Environment.NewLine}{Environment.NewLine}";
     response.Headers[HeaderNames.ContentType] = "text/event-stream";
 
-    await queue.ConsumeLogAsync(ct, async (item) => {
+    await queue.ConsumeLogAsync(ct, async (item) =>
+    {
         await response.WriteAsync($"{JsonSerializer.Serialize(item)}{LINE_END}", ct);
         await response.Body.FlushAsync(ct);
     });
