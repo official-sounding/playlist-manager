@@ -102,7 +102,7 @@ public class VideoController(IVideoRepository repo, ITagRepository tagRepo, Vide
         var tag = await tagRepo.CreateAsync(req);
         await repo.AddTagAsync(videoId, tag.id);
 
-        return NoContent();
+        return Json(tag);
     }
 
     [HttpDelete("{videoId:long}/tag/{tagId:long}")]

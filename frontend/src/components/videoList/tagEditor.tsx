@@ -1,17 +1,19 @@
 import { FormEvent, useMemo } from 'react';
 import { Video } from '../../model/video';
-import { useAppDispatch, useAppSelector } from '../../store';
 import { serialize } from '../../utils/serialize';
-import { addTagToVideo } from '../../store/slices/video';
 
 import styles from './tagEditor.module.css';
+import { useTags } from '../../queries/useTags';
+import { useAddTag } from '../../mutations/useAddTag';
 
 type Args = { video: Video };
 
 export function TagEditor({ video }: Args) {
     const videoId = video.id;
-    const allTags = useAppSelector((state) => state.tag.allTags);
-    const dispatch = useAppDispatch();
+    const allTags = useTags();
+
+    const { mutate: addTag } = useAddTag();
+
     const tagIdSet = useMemo(() => new Set(video.tags.map((t) => t.id)), [video.tags]);
     const availableTags = useMemo(() => allTags.filter((t) => !tagIdSet.has(t.id)), [allTags, tagIdSet]);
 
@@ -22,7 +24,7 @@ export function TagEditor({ video }: Args) {
         const tag = availableTags.find((t) => `${t.id}` === tagId);
 
         if (tag) {
-            dispatch(addTagToVideo({ videoId, tag }));
+            addTag({ videoId, tag });
         }
     };
 

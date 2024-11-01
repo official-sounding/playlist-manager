@@ -1,16 +1,14 @@
 import { formatDistanceToNow } from 'date-fns';
-import { useAppDispatch, useAppSelector, useThunkState } from '../../store';
-import { getVideoStatus } from '../../store/slices/video';
-import { useCallback } from 'react';
+import { useVideoDownloadStatus } from '../../queries/useVideoDownloadStatus';
 
 export function JobStatus({ jobId }: { jobId: string }) {
-    const dispatch = useAppDispatch();
-    const { job } = useAppSelector((state) => state.video.downloadRequests[jobId] ?? {});
-    const status = useThunkState('video', getVideoStatus.typePrefix);
-    const reload = useCallback(() => dispatch(getVideoStatus(jobId)), [dispatch, jobId]);
+    const {
+        data: { job },
+        refetch,
+    } = useVideoDownloadStatus(jobId);
 
-    if(!job) {
-        return <></>
+    if (!job) {
+        return <></>;
     }
 
     const formattedQueue = formatDistanceToNow(job.queueTime);
@@ -24,7 +22,7 @@ export function JobStatus({ jobId }: { jobId: string }) {
                 <dt>Queue Date:</dt>
                 <dd title={job.queueTime}>{formattedQueue}</dd>
             </dl>
-            { status.state === 'pending' ? "Loading..." : <button onClick={reload}>Reload</button> }
+            <button onClick={() => refetch()}>Reload</button>
         </>
     );
 }

@@ -1,19 +1,13 @@
 import { Video } from '../../model/video';
-import { useAppDispatch } from '../../store';
-import { removeTagFromVideo } from '../../store/slices/video';
-import { Tag } from '../../model/tag';
 
 import styles from './tagList.module.css';
+import { useRemoveTag } from '../../mutations/useRemoveTag';
 
 type Args = { video: Video };
 
 export function TagList({ video }: Args) {
     const videoId = video.id;
-    const dispatch = useAppDispatch();
-
-    const removeTag = (tag: Tag) => {
-        dispatch(removeTagFromVideo({ videoId, tag }));
-    };
+    const { mutate: removeTag } = useRemoveTag();
 
     return (
         <div>
@@ -21,7 +15,7 @@ export function TagList({ video }: Args) {
                 {video.tags.map((t) => (
                     <li key={t.id}>
                         {t.title}{' '}
-                        <button className={styles.removeBtn} onClick={() => removeTag(t)}>
+                        <button className={styles.removeBtn} onClick={() => removeTag({ videoId, tag: t })}>
                             &times;
                         </button>
                     </li>

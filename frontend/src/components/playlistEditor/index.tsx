@@ -24,6 +24,7 @@ import styles from './playlistEditor.module.css';
 import { useMemo } from 'react';
 import { prettyPrintDuration } from '../../utils/prettyPrintDuration';
 import { VideoSearch } from './videoSearch';
+import { useVideos } from '../../queries/useVideos';
 
 function SortableItem({ video }: { video: Video }) {
     const dispatch = useAppDispatch();
@@ -71,7 +72,16 @@ export function PlaylistEditor() {
     );
 
     const title = useAppSelector(currentPlaylistTitle);
-    const playlistVideos = useAppSelector(hydratedDraftPlaylistEntries);
+    const videos = useVideos();
+    const videoIdMap = useMemo(
+        () =>
+            videos.reduce<Record<number, Video>>((prev, curr) => {
+                prev[curr.id] = curr;
+                return prev;
+            }, {}),
+        [videos]
+    );
+    const playlistVideos = useAppSelector((state) => hydratedDraftPlaylistEntries(state, videoIdMap));
 
     const totalDuration = useMemo(
         () => prettyPrintDuration(playlistVideos.reduce((p, c) => p + c.duration, 0)),

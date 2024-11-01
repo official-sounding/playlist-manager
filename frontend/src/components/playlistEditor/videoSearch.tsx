@@ -1,9 +1,9 @@
 import { ReactSearchAutocomplete } from 'react-search-autocomplete';
-import { useAppSelector } from '../../store';
 import { Video } from '../../model/video';
 
 import styles from './videoSearch.module.css';
 import { useState } from 'react';
+import { useVideos } from '../../queries/useVideos';
 
 type Args = {
     onSelect: (selection: Video) => void;
@@ -40,7 +40,7 @@ const options = {
 
 export function VideoSearch({ onSelect }: Args) {
     const [inputSearchString, setInputSearchString] = useState('');
-    const items = useAppSelector((state) => state.video.allVideos);
+    const items = useVideos();
 
     const selectItem = (item: Video) => {
         onSelect(item);

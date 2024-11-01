@@ -8,6 +8,7 @@ import { useLocalStorage } from 'usehooks-ts';
 import { Video } from '../../model/video';
 import { addVideoToDraft, removeVideoFromDraft } from '../../store/slices/playlist';
 import { TagEditor } from './tagEditor';
+import { useVideos } from '../../queries/useVideos';
 
 type EnrichedVideo = Video & { inPlaylist: boolean };
 
@@ -18,7 +19,7 @@ function enrich(draftPlaylistVideoIds: number[]): (v: Video) => EnrichedVideo {
 export function VideoList() {
     const dispatch = useAppDispatch();
     const [showThumbnails, setShowThumbnails] = useLocalStorage('show-thumbnails', true);
-    const allVideos = useAppSelector((state) => state.video.allVideos);
+    const allVideos = useVideos();
     const { selectedPlaylistId, draftPlaylistVideoIds } = useAppSelector((state) => state.playlist);
     const [search, setSearch] = useState<string>('');
     const debouncedSync = useDebouncedSync();
