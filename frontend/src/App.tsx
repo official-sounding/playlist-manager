@@ -1,6 +1,5 @@
 import './App.css';
 import { VideoList } from './components/videoList';
-import { InitialDataLoader } from './components/initialDataLoader';
 import { PlaylistFooter } from './components/playlistFooter';
 import { useAppSelector } from './store';
 import { assertNever } from './utils/assertNever';
@@ -36,7 +35,6 @@ function App() {
                 </div>
             )}>
             <QueryClientProvider client={queryClient}>
-                <InitialDataLoader />
                 <div id='root-content'>
                     <ViewMapper />
                 </div>

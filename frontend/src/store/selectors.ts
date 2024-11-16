@@ -1,10 +1,10 @@
 import { createSelector } from '@reduxjs/toolkit';
-import { RootState } from '.';
+import { AppState } from '.';
 import { Video } from '../model/video';
 import { Playlist } from '../model/playlist';
 
 export const hydratedDraftPlaylistEntries = createSelector(
-    [(state: RootState) => state.playlist.draftPlaylistVideoIds, (_, videoIdMap: Record<number, Video>) => videoIdMap],
+    [(state: AppState) => state.playlist.draftPlaylistVideoIds, (_, videoIdMap: Record<number, Video>) => videoIdMap],
     (draftPlaylistVideoIds: number[], videoIdMap: Record<number, Video>) => {
         const videos = draftPlaylistVideoIds.map((id) => videoIdMap[id]).filter((v) => !!v);
         return videos;
@@ -12,7 +12,7 @@ export const hydratedDraftPlaylistEntries = createSelector(
 );
 
 export const currentPlaylistTitle = createSelector(
-    [(state: RootState) => state.playlist.selectedPlaylistId, (state: RootState) => state.playlist.allPlaylists],
+    [(state: AppState) => state.playlist.selectedPlaylistId, (_, allPlaylists: Playlist[]) => allPlaylists],
     (selectedPlaylistId: number | undefined, allPlaylists: Playlist[]): string | undefined => {
         if (!selectedPlaylistId) {
             return undefined;

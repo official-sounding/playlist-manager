@@ -1,12 +1,15 @@
 import { useAppDispatch, useAppSelector } from '../../store';
 import styles from './playlistFooter.module.css';
-import { createPlaylist, selectPlaylist, updatePlaylist } from '../../store/slices/playlist';
+import { selectPlaylist } from '../../store/slices/playlist';
 import { updateView, View } from '../../store/slices/config';
+import { usePlaylists } from '../../queries/usePlaylists';
+import { useCreatePlaylist } from '../../mutations/useCreatePlaylist';
 
 export function PlaylistFooter() {
-    const { allPlaylists, selectedPlaylistId, draftPlaylistVideoIds, draftDirty } = useAppSelector(
-        (state) => state.playlist
-    );
+    const allPlaylists = usePlaylists();
+    const { mutate: createPlaylist } = useCreatePlaylist();
+
+    const { selectedPlaylistId, draftPlaylistVideoIds, draftDirty } = useAppSelector((state) => state.playlist);
 
     const view = useAppSelector((state) => state.config.view);
     const dispatch = useAppDispatch();
@@ -16,12 +19,8 @@ export function PlaylistFooter() {
     const addPlaylist = () => {
         const title = prompt('Enter the playlist title');
         if (title) {
-            dispatch(createPlaylist({ title }));
+            createPlaylist({ title });
         }
-    };
-
-    const syncPlaylist = () => {
-        dispatch(updatePlaylist());
     };
 
     const toggleView = () => {
@@ -36,7 +35,9 @@ export function PlaylistFooter() {
                     <select
                         value={playlistId}
                         className={styles.playlistSelect}
-                        onChange={(e) => dispatch(selectPlaylist(Number(e.target.value)))}>
+                        onChange={(e) =>
+                            dispatch(selectPlaylist(allPlaylists.find((p) => p.id === Number(e.target.value))!))
+                        }>
                         <option value={-1} disabled>
                             Select a Playlist
                         </option>
@@ -54,7 +55,7 @@ export function PlaylistFooter() {
                         {!draftDirty && draftPlaylistVideoIds.length > 0 && (
                             <a href={`/api/playlist/${selectedPlaylistId}/playlist.m3u8`}>Download m3u8 file</a>
                         )}
-                        {draftDirty && <button onClick={syncPlaylist}>Sync Entries</button>}
+                        {draftDirty && 'Unsaved Changes'}
                     </div>
                 )}
                 <div>

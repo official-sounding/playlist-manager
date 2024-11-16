@@ -2,13 +2,14 @@ import { Download } from '../download';
 
 import classes from './styles.module.css';
 import { TagList } from './tagList';
-import { useAppDispatch, useAppSelector, useDebouncedSync } from '../../store';
+import { useAppDispatch, useAppSelector } from '../../store';
 import { useMemo, useState } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 import { Video } from '../../model/video';
 import { addVideoToDraft, removeVideoFromDraft } from '../../store/slices/playlist';
 import { TagEditor } from './tagEditor';
 import { useVideos } from '../../queries/useVideos';
+import { useUpdatePlaylist } from '../../mutations/useUpdatePlaylist';
 
 type EnrichedVideo = Video & { inPlaylist: boolean };
 
@@ -22,7 +23,7 @@ export function VideoList() {
     const allVideos = useVideos();
     const { selectedPlaylistId, draftPlaylistVideoIds } = useAppSelector((state) => state.playlist);
     const [search, setSearch] = useState<string>('');
-    const debouncedSync = useDebouncedSync();
+    const { debouncedUpdatePlaylist } = useUpdatePlaylist();
 
     const videos = useMemo(() => {
         const searchValue = search.trim();
@@ -44,12 +45,12 @@ export function VideoList() {
 
     const addVideo = (v: Video) => {
         dispatch(addVideoToDraft({ videoId: v.id }));
-        debouncedSync();
+        debouncedUpdatePlaylist();
     };
 
     const removeVideo = (v: Video) => {
         dispatch(removeVideoFromDraft(v.id));
-        debouncedSync();
+        debouncedUpdatePlaylist();
     };
 
     return (

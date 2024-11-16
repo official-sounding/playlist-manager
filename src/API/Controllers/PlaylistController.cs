@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PlaylistManager.Data.Models;
 
 [Route("/api/playlist")]
-public class PlaylistController(PlaylistRepository repo): Controller 
+public class PlaylistController(PlaylistRepository repo) : Controller
 {
     [HttpGet("")]
     public async Task<IEnumerable<Playlist>> Index()
@@ -41,23 +41,69 @@ public class PlaylistController(PlaylistRepository repo): Controller
         return Created($"/api/playlist/{result.id}", result);
     }
 
-    [HttpPut("{id:int}/entries")]
+    [HttpPut("{id:int}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> Update(int id, [FromBody] PlaylistEntriesUpdateRequest body)
+    public async Task<IActionResult> Update(int id, [FromBody] List<long> videoIds)
     {
         if (id <= 0)
         {
             return BadRequest("id is invalid");
         }
 
+        var existing = await repo.GetByIdAsync(id);
+
+        if (existing is null)
+        {
+            return NotFound("playlist not found");
+        }
+
+        var body = BuildPayload(existing, videoIds);
+
         var result = await repo.UpdateEntriesAsync(id, body);
         return Json(result);
     }
 
+    private PlaylistEntriesUpdateRequest BuildPayload(Playlist existing, List<long> videoIds)
+    {
+        var toAdd = new List<PlaylistEntryChangeRequest>();
+        var toUpdate = new List<PlaylistEntryChangeRequest>();
+        var toRemove = new List<long>();
+
+        var newVideoIds = videoIds.Select((id, idx) => (id, idx)).ToDictionary();
+        var existingVideoIds = existing.entries.Select((v, idx) => (v.id, idx)).ToDictionary();
+
+
+        foreach (var (id, idx) in newVideoIds)
+        {
+            var exists = existingVideoIds.TryGetValue(id, out int existingPosition);
+
+            if (!exists)
+            {
+                toAdd.Add(new(id, idx));
+            }
+
+            if (exists && existingPosition != idx)
+            {
+                toUpdate.Add(new(id, idx));
+            }
+        }
+
+        foreach (var id in existingVideoIds.Keys)
+        {
+            if (!newVideoIds.ContainsKey(id))
+            {
+                toRemove.Add(id);
+            }
+        }
+
+        return new PlaylistEntriesUpdateRequest(toAdd, toRemove, toUpdate);
+    }
+
     [HttpGet("{id:int}/{filename}.m3u8")]
-    public async Task<IActionResult> GetPlaylistFile(int id, string filename) {
+    public async Task<IActionResult> GetPlaylistFile(int id, string filename)
+    {
         if (id <= 0)
         {
             return BadRequest("id is invalid");

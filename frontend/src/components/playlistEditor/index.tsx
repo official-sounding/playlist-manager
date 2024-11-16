@@ -1,5 +1,5 @@
 import { Video } from '../../model/video';
-import { useAppDispatch, useAppSelector, useDebouncedSync } from '../../store';
+import { useAppDispatch, useAppSelector } from '../../store';
 import { currentPlaylistTitle, hydratedDraftPlaylistEntries } from '../../store/selectors';
 
 import { CSS } from '@dnd-kit/utilities';
@@ -25,10 +25,12 @@ import { useMemo } from 'react';
 import { prettyPrintDuration } from '../../utils/prettyPrintDuration';
 import { VideoSearch } from './videoSearch';
 import { useVideos } from '../../queries/useVideos';
+import { usePlaylists } from '../../queries/usePlaylists';
+import { useUpdatePlaylist } from '../../mutations/useUpdatePlaylist';
 
 function SortableItem({ video }: { video: Video }) {
     const dispatch = useAppDispatch();
-    const syncPlaylist = useDebouncedSync();
+    const { debouncedUpdatePlaylist } = useUpdatePlaylist();
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: video.id });
 
     const style = {
@@ -38,7 +40,7 @@ function SortableItem({ video }: { video: Video }) {
 
     const removeVideo = () => {
         dispatch(removeVideoFromDraft(video.id));
-        syncPlaylist();
+        debouncedUpdatePlaylist();
     };
 
     return (
@@ -63,7 +65,8 @@ function SortableItem({ video }: { video: Video }) {
 
 export function PlaylistEditor() {
     const dispatch = useAppDispatch();
-    const syncPlaylist = useDebouncedSync();
+    const playlists = usePlaylists();
+    const { debouncedUpdatePlaylist } = useUpdatePlaylist();
     const sensors = useSensors(
         useSensor(PointerSensor),
         useSensor(KeyboardSensor, {
@@ -71,7 +74,7 @@ export function PlaylistEditor() {
         })
     );
 
-    const title = useAppSelector(currentPlaylistTitle);
+    const title = useAppSelector((s) => currentPlaylistTitle(s, playlists));
     const videos = useVideos();
     const videoIdMap = useMemo(
         () =>
@@ -93,13 +96,13 @@ export function PlaylistEditor() {
 
         if (active.id !== over?.id && typeof active.id === 'number' && typeof over?.id === 'number') {
             dispatch(reorderVideoInDraft({ active: active.id, over: over.id }));
-            syncPlaylist();
+            debouncedUpdatePlaylist();
         }
     }
 
     function onSearchSelect(video: Video) {
         dispatch(addVideoToDraft({ videoId: video.id }));
-        syncPlaylist();
+        debouncedUpdatePlaylist();
     }
 
     return (
