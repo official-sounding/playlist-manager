@@ -1,9 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Playlist } from '../../model/playlist';
-import { SliceWithRequest } from '../thunk-utils';
 import { arrayMove } from '@dnd-kit/sortable';
 
-export type PlaylistSlice = SliceWithRequest & {
+export type PlaylistSlice = {
     selectedPlaylistId: number | undefined;
     draftPlaylistVideoIds: number[];
     draftDirty: boolean;
@@ -13,7 +12,6 @@ const initialState: PlaylistSlice = {
     selectedPlaylistId: undefined,
     draftPlaylistVideoIds: [],
     draftDirty: false,
-    requestState: {},
 };
 
 export const playlistSlice = createSlice({
