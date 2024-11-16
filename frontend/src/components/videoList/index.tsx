@@ -17,31 +17,38 @@ function enrich(draftPlaylistVideoIds: number[]): (v: Video) => EnrichedVideo {
     return (v) => ({ ...v, inPlaylist: draftPlaylistVideoIds.includes(v.id) });
 }
 
+function useSearchFilter(): [(v: Video) => boolean, string, React.Dispatch<React.SetStateAction<string>>] {
+    const [search, setSearch] = useState<string>('');
+
+    const filterFn = useMemo(() => {
+        const searchValue = search.trim();
+        if (!searchValue) {
+            return () => true;
+        }
+
+        const searchRegex = new RegExp(searchValue, 'i');
+
+        return (v: Video) =>
+            v.filename.search(searchRegex) >= 0 ||
+            v.title.search(searchRegex) >= 0 ||
+            v.tags.some((t) => t.title.search(searchRegex) >= 0);
+    }, [search]);
+
+    return [filterFn, search, setSearch];
+}
+
 export function VideoList() {
     const dispatch = useAppDispatch();
     const [showThumbnails, setShowThumbnails] = useLocalStorage('show-thumbnails', true);
     const allVideos = useVideos();
     const { selectedPlaylistId, draftPlaylistVideoIds } = useAppSelector((state) => state.playlist);
-    const [search, setSearch] = useState<string>('');
+    const [filterFn, search, setSearch] = useSearchFilter();
+
     const { debouncedUpdatePlaylist } = useUpdatePlaylist();
 
     const videos = useMemo(() => {
-        const searchValue = search.trim();
-        if (!searchValue) {
-            return allVideos.map(enrich(draftPlaylistVideoIds));
-        }
-
-        const searchRegex = new RegExp(searchValue, 'i');
-
-        return allVideos
-            .filter(
-                (v) =>
-                    v.filename.search(searchRegex) >= 0 ||
-                    v.title.search(searchRegex) >= 0 ||
-                    v.tags.some((t) => t.title.search(searchRegex) >= 0)
-            )
-            .map(enrich(draftPlaylistVideoIds));
-    }, [search, allVideos, draftPlaylistVideoIds]);
+        return allVideos.filter(filterFn).map(enrich(draftPlaylistVideoIds));
+    }, [filterFn, allVideos, draftPlaylistVideoIds]);
 
     const addVideo = (v: Video) => {
         dispatch(addVideoToDraft({ videoId: v.id }));

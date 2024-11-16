@@ -1,7 +1,5 @@
 import { Video } from '../../model/video';
-import { useAppDispatch, useAppSelector } from '../../store';
-import { currentPlaylistTitle, hydratedDraftPlaylistEntries } from '../../store/selectors';
-
+import { useAppDispatch, useDraftPlaylist } from '../../store';
 import { CSS } from '@dnd-kit/utilities';
 import {
     DndContext,
@@ -21,11 +19,7 @@ import {
 import { addVideoToDraft, removeVideoFromDraft, reorderVideoInDraft } from '../../store/slices/playlist';
 
 import styles from './playlistEditor.module.css';
-import { useMemo } from 'react';
-import { prettyPrintDuration } from '../../utils/prettyPrintDuration';
 import { VideoSearch } from './videoSearch';
-import { useVideos } from '../../queries/useVideos';
-import { usePlaylists } from '../../queries/usePlaylists';
 import { useUpdatePlaylist } from '../../mutations/useUpdatePlaylist';
 
 function SortableItem({ video }: { video: Video }) {
@@ -65,7 +59,6 @@ function SortableItem({ video }: { video: Video }) {
 
 export function PlaylistEditor() {
     const dispatch = useAppDispatch();
-    const playlists = usePlaylists();
     const { debouncedUpdatePlaylist } = useUpdatePlaylist();
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -74,22 +67,7 @@ export function PlaylistEditor() {
         })
     );
 
-    const title = useAppSelector((s) => currentPlaylistTitle(s, playlists));
-    const videos = useVideos();
-    const videoIdMap = useMemo(
-        () =>
-            videos.reduce<Record<number, Video>>((prev, curr) => {
-                prev[curr.id] = curr;
-                return prev;
-            }, {}),
-        [videos]
-    );
-    const playlistVideos = useAppSelector((state) => hydratedDraftPlaylistEntries(state, videoIdMap));
-
-    const totalDuration = useMemo(
-        () => prettyPrintDuration(playlistVideos.reduce((p, c) => p + c.duration, 0)),
-        [playlistVideos]
-    );
+    const { title, videos, totalDuration } = useDraftPlaylist();
 
     function handleDragEnd(event: DragEndEvent) {
         const { active, over } = event;
@@ -109,14 +87,14 @@ export function PlaylistEditor() {
         <>
             <h1>Playlist: {title}</h1>
             <h2>
-                {playlistVideos.length} entries &mdash; {totalDuration}
+                {videos.length} entries &mdash; {totalDuration}
             </h2>
 
             <hr />
             <VideoSearch onSelect={onSearchSelect} />
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                <SortableContext items={playlistVideos} strategy={verticalListSortingStrategy}>
-                    {playlistVideos.map((video) => (
+                <SortableContext items={videos} strategy={verticalListSortingStrategy}>
+                    {videos.map((video) => (
                         <SortableItem key={video.id} video={video} />
                     ))}
                 </SortableContext>

@@ -1,7 +1,6 @@
-import { useAppDispatch, useAppSelector } from '../../store';
+import { useAppDispatch, useAppSelector, useViewToggle } from '../../store';
 import styles from './playlistFooter.module.css';
 import { selectPlaylist } from '../../store/slices/playlist';
-import { updateView, View } from '../../store/slices/config';
 import { usePlaylists } from '../../queries/usePlaylists';
 import { useCreatePlaylist } from '../../mutations/useCreatePlaylist';
 
@@ -10,8 +9,8 @@ export function PlaylistFooter() {
     const { mutate: createPlaylist } = useCreatePlaylist();
 
     const { selectedPlaylistId, draftPlaylistVideoIds, draftDirty } = useAppSelector((state) => state.playlist);
+    const [view, toggleView] = useViewToggle();
 
-    const view = useAppSelector((state) => state.config.view);
     const dispatch = useAppDispatch();
 
     const playlistId = selectedPlaylistId ?? -1;
@@ -23,16 +22,12 @@ export function PlaylistFooter() {
         }
     };
 
-    const toggleView = () => {
-        const newView: View = view === 'playlist' ? 'video' : 'playlist';
-        dispatch(updateView(newView));
-    };
-
     return (
         <footer className={styles.footer}>
             <div className={styles.content}>
                 <div>
                     <select
+                        disabled={draftDirty}
                         value={playlistId}
                         className={styles.playlistSelect}
                         onChange={(e) =>
